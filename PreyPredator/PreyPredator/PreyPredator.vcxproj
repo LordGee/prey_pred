@@ -243,6 +243,9 @@
     <ClInclude Include="res\sdl\inc\SDL_version.h" />
     <ClInclude Include="res\sdl\inc\SDL_video.h" />
     <ClInclude Include="res\sdl\inc\SDL_vulkan.h" />
+    <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Test1.h" />
+    <ClInclude Include="src\Test2.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="res\mpi\lib\x64\msmpi.lib" />
