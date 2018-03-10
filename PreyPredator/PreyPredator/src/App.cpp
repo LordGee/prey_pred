@@ -1,8 +1,11 @@
 #include "App.h"
-#include "Setup.h"
 
 App::App() {
-	Setup setup;
 	setup.SelectProjectType();
 	setup.SetWindowSize();
+	switch (setup.PROJECT_TYPE) {
+	case 0:
+		sim = new Serial;
+		break;
+	}
 }

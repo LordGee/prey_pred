@@ -244,7 +244,9 @@
     <ClInclude Include="res\sdl\inc\SDL_video.h" />
     <ClInclude Include="res\sdl\inc\SDL_vulkan.h" />
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Serial.h" />
     <ClInclude Include="src\Setup.h" />
+    <ClInclude Include="src\Simulator.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="res\mpi\lib\x64\msmpi.lib" />
@@ -270,7 +272,9 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Serial.cpp" />
     <ClCompile Include="src\Setup.cpp" />
+    <ClCompile Include="src\Simulator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
