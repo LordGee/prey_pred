@@ -1,16 +1,12 @@
 #pragma once
+#include <vector>
 
 class Setup {
 public:
-	int WIDTH = -1, HEIGHT = -1, PROJECT_TYPE = -1;
+	int PROJECT_TYPE, WIDTH, HEIGHT, PREY_PERCENT, PRED_PERCENT;
 
 private:
-	const char* m_ProjectType[4] = {
-		"1. \tSerial",
-		"2. \tOpenMP",
-		"3. \tMicrosoft MPI",
-		"4. \tHybrid",
-	};
+	std::vector<const char*> m_ProjectType;
 
 	const char* m_GridOptions[2] = { 
 		"Select Grid Size for X : ", 
@@ -20,10 +16,14 @@ private:
 	int m_OptionStep = 0;
 
 public:
+	Setup();
+	void DisplaySelection();
+
 	void SelectProjectType();
 	void SetWindowSize();
-
+	
 	
 private:
 	void RefreshConsole();
+	
 };

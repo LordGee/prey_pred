@@ -1,6 +1,10 @@
 #include "App.h"
+#include <cstdlib>
 
 App::App() {
+	setup = new Setup;
+	setup->DisplaySelection();
+	system("pause");
 	setup->SelectProjectType();
 	setup->SetWindowSize();
 	switch (setup->PROJECT_TYPE) {
