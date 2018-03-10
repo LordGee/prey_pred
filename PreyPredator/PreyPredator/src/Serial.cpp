@@ -2,7 +2,6 @@
 #include <cstdlib>
 
 
-
 void Serial::PopulateGrid() {
 	srand(seed);
 	for (int x = 0; x < m_Width; x++) {

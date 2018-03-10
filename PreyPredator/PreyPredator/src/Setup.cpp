@@ -17,45 +17,13 @@ Setup::Setup() {
 }
 
 void Setup::SelectProjectType() {
-	std::cout << "Select type of application to run:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Select type of project to run:" << std::endl;
 	for (int i= 0; i < 4; i++) {
 		std::cout << m_ProjectType[i] << std::endl;
 	}
 	std::cin >> PROJECT_TYPE;
 	PROJECT_TYPE = PROJECT_TYPE - 1;
-	m_OptionStep++;
-	RefreshConsole();
-}
-
-void Setup::SetWindowSize() {
-	std::cout << m_GridOptions[0];
-	std::cin >> WIDTH;
-	m_OptionStep++;
-	RefreshConsole();
-
-	std::cout << m_GridOptions[1];
-	std::cin >> HEIGHT;
-	m_OptionStep++;
-	RefreshConsole();
-}
-
-void Setup::RefreshConsole() {
-	system("cls");
-	std::cout << "You have choosen the following options:" << std::endl;
-	int tempValue = m_OptionStep;
-	for (int i = 0; i < tempValue; i++) {
-		switch (tempValue - i) {
-		case 1:
-			std::cout << "\tProject Type: \t\t" << m_ProjectType[PROJECT_TYPE] << std::endl;
-			break;
-		case 2:
-			std::cout << "\tGrid Width: \t\t" << WIDTH << std::endl;
-			break;
-		case 3:
-			std::cout << "\tGrid Height: \t\t" << HEIGHT << std::endl;
-			break;
-		}
-	}
 }
 
 void Setup::DisplaySelection() {
@@ -74,27 +42,84 @@ void Setup::DisplaySelection() {
 	std::cout << "| 5.\t | Predator Percentage:\t\t| " << PRED_PERCENT << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Select an option to edit (1, 2, 3, 4, 5) or press enter to accept";
+	std::cout << "Select an option to edit (1, 2, 3, 4, 5) " << std::endl;
+	std::cout << "...or press enter (0) to accept the above." << std::endl;
 	int tempSelection;
 	std::cin >> tempSelection;
-	switch (tempSelection) {
+	IncorrectValueEntry(tempSelection, std::cin.fail());
+	EditOptions(tempSelection);
+}
+
+void Setup::EditOptions(int value) {
+	int tempValue;
+	switch (value) {
+	case 0:
+		break;
 	case 1:
-		std::cout << "You selected something good" << std::endl;
-		break;
+		SelectProjectType();
+		DisplaySelection();
 	case 2:
-		std::cout << "Change grid size" << std::endl;
-		break;
+		std::cout << "How many grid cells would you like for the WIDTH?" << std::endl;
+		std::cin >> tempValue;
+		IncorrectValueEntry(tempValue, std::cin.fail());
+		while (tempValue < 10) {
+			std::cout << "Choose a number larger then 10 ..." << std::endl;
+			std::cin >> tempValue;
+			IncorrectValueEntry(tempValue, std::cin.fail());
+		}
+		WIDTH = tempValue;	
+		DisplaySelection();
 	case 3:
-		std::cout << "Change grid size" << std::endl;
-		break;
+		std::cout << "How many grid cells would you like for the HEIGHT?" << std::endl;
+		std::cin >> tempValue;
+		IncorrectValueEntry(tempValue, std::cin.fail());
+		while (tempValue < 10) {
+			std::cout << "Choose a number larger then 10 ..." << std::endl;
+			std::cin >> tempValue;
+			IncorrectValueEntry(tempValue, std::cin.fail());
+		}
+		HEIGHT = tempValue;
+		DisplaySelection();
 	case 4:
-		std::cout << "Change grid size" << std::endl;
-		break;
+		std::cout << "What percentage of starting PREY would you like?" << std::endl;
+		std::cin >> tempValue;
+		IncorrectValueEntry(tempValue, std::cin.fail());
+		while (tempValue < 1 || tempValue > 100) {
+			std::cout << "Choose a pecentage value larger then 0 and less then 100 ..." << std::endl;
+			std::cin >> tempValue;
+			IncorrectValueEntry(tempValue, std::cin.fail());
+		}
+		if (PRED_PERCENT + tempValue > 100) {
+			PRED_PERCENT = 100 - tempValue;
+		}
+		PREY_PERCENT = tempValue;
+		DisplaySelection();
 	case 5:
-		std::cout << "Change grid size" << std::endl;
-		break;
+		std::cout << "What percentage of starting PREDATORS would you like?" << std::endl;
+		std::cin >> tempValue;
+		IncorrectValueEntry(tempValue, std::cin.fail());
+		while (tempValue < 1 || tempValue > 100) {
+			std::cout << "Choose a pecentage value larger then 0 and less then 100 ..." << std::endl;
+			std::cin >> tempValue;
+			IncorrectValueEntry(tempValue, std::cin.fail());
+		}
+		if (PREY_PERCENT + tempValue > 100) {
+			PREY_PERCENT = 100 - tempValue;
+		}
+		PRED_PERCENT = tempValue;
+		DisplaySelection();
 	default:
 		DisplaySelection();
+		break;
 	}
-	
+}
+
+void Setup::IncorrectValueEntry(int& value, bool fail) {
+	while (fail) {
+		std::cout << "Incorrect value entry, please try again!" << std::endl;
+		std::cin.clear();
+		std::cin.ignore(256, '\n');
+		std::cin >> value;
+		fail = std::cin.fail();
+	}
 }
