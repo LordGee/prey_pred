@@ -285,10 +285,7 @@
     <ClInclude Include="src\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Test1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Test2.h">
+    <ClInclude Include="src\Setup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -315,6 +312,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Setup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

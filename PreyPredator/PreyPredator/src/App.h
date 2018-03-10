@@ -5,8 +5,10 @@ public:
 
 private:
 
+protected:
+	// int WIDTH, HEIGHT;
+
 public:
-	App() {};
-	virtual void TestFunction() = 0;
+	App();
 
 };

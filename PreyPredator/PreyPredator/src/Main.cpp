@@ -1,15 +1,11 @@
-#include "SDL.h"
+#include <cstdlib>
 #include <cstdio>
-#include "Test1.h"
-#include "Test2.h"
+#include "App.h"
 
 int main(int argc, char* args[]) {
-	printf("Hello PREY\n");
+	printf("Welcome to the PREY PREDATOR Simulator\n");
 
-	App* one = new Test1();
-	App* two = new Test2();
-	one->TestFunction();
-	two->TestFunction();
+	App* app = new App;
 
 	system("PAUSE");
 	return 1;
