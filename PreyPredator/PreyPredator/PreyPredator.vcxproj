@@ -244,6 +244,7 @@
     <ClInclude Include="res\sdl\inc\SDL_video.h" />
     <ClInclude Include="res\sdl\inc\SDL_vulkan.h" />
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Cell.h" />
     <ClInclude Include="src\Serial.h" />
     <ClInclude Include="src\Setup.h" />
     <ClInclude Include="src\Simulator.h" />

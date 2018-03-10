@@ -6,7 +6,7 @@ class App {
 public:
 
 private:
-	Setup setup;
+	Setup* setup;
 	Simulator* sim;
 
 protected:
@@ -14,5 +14,6 @@ protected:
 
 public:
 	App();
+	~App();
 
 };
