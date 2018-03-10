@@ -13,7 +13,6 @@ App::App() {
 		break;
 	}
 
-	system("pause");
 }
 
 App::~App() {

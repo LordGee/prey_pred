@@ -4,11 +4,10 @@
 class Serial : public Simulator {
 public:
 
-private:
-
 public:
+
 	Serial(int width, int height)
-		: Simulator(width, height) {} ;
+		: Simulator(width, height) {}
 
 	void PopulateGrid() override;
 };

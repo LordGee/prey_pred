@@ -1,7 +1,6 @@
 #include "Setup.h"
 #include <iostream>
 #include <string>
-#include <stdio.h>
 #include <stdlib.h>
 
 Setup::Setup() {
@@ -44,20 +43,21 @@ void Setup::DisplaySelection() {
 	std::cout << std::endl;
 	std::cout << "Select an option to edit (1, 2, 3, 4, 5) " << std::endl;
 	std::cout << "...or press enter (0) to accept the above." << std::endl;
-	int tempSelection;
+	int tempSelection = -1;
 	std::cin >> tempSelection;
 	IncorrectValueEntry(tempSelection, std::cin.fail());
 	EditOptions(tempSelection);
 }
 
 void Setup::EditOptions(int value) {
-	int tempValue;
+	int tempValue = -1;
 	switch (value) {
 	case 0:
 		break;
 	case 1:
 		SelectProjectType();
 		DisplaySelection();
+		break;
 	case 2:
 		std::cout << "How many grid cells would you like for the WIDTH?" << std::endl;
 		std::cin >> tempValue;
@@ -69,6 +69,7 @@ void Setup::EditOptions(int value) {
 		}
 		WIDTH = tempValue;	
 		DisplaySelection();
+		break;
 	case 3:
 		std::cout << "How many grid cells would you like for the HEIGHT?" << std::endl;
 		std::cin >> tempValue;
@@ -80,6 +81,7 @@ void Setup::EditOptions(int value) {
 		}
 		HEIGHT = tempValue;
 		DisplaySelection();
+		break;
 	case 4:
 		std::cout << "What percentage of starting PREY would you like?" << std::endl;
 		std::cin >> tempValue;
@@ -94,6 +96,7 @@ void Setup::EditOptions(int value) {
 		}
 		PREY_PERCENT = tempValue;
 		DisplaySelection();
+		break;
 	case 5:
 		std::cout << "What percentage of starting PREDATORS would you like?" << std::endl;
 		std::cin >> tempValue;
@@ -108,6 +111,7 @@ void Setup::EditOptions(int value) {
 		}
 		PRED_PERCENT = tempValue;
 		DisplaySelection();
+		break;
 	default:
 		DisplaySelection();
 		break;
