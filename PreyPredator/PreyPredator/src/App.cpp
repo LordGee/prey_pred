@@ -4,23 +4,14 @@
 App::App() {
 	setup = new Setup;
 	setup->DisplaySelection();
-	
-
 	switch (setup->PROJECT_TYPE) {
 	case 0:
 		sim = new Serial(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
 		sim->PopulateGrid();
-		m_IterationCount = 0;
-		while (m_IterationCount < setup->ITERATIONS) {
-			if (setup->DRAW_GRAPHICS == 1) {
-				sim->DrawSimToScreen();
-			}
-
-			m_IterationCount++;
+		if (setup->DRAW_GRAPHICS == 1) {
+			sim->DrawSimToScreen(setup->ITERATIONS);
 		}
-		break;
 	}
-
 }
 
 App::~App() {

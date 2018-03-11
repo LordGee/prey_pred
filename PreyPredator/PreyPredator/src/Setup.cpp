@@ -6,8 +6,8 @@
 Setup::Setup() {
 	// Set default values
 	PROJECT_TYPE = 0;
-	WIDTH = 100;
-	HEIGHT = 100;
+	WIDTH = 1000;
+	HEIGHT = 1000;
 	PREY_PERCENT = 50;
 	PRED_PERCENT = 25;
 	RANDOM_SEED = 1234;

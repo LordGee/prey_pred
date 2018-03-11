@@ -22,37 +22,35 @@ void Serial::PopulateGrid() {
 	int z = 0;
 }
 
-void Serial::DrawSimToScreen() {
-	bool quit = false;
-	
-	/*
+void Serial::DrawSimToScreen(int count) {
+	int counter = 0;
+
 	SDL_Event event;
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+	SDL_Renderer* rendererPrey = SDL_CreateRenderer(window, -1, 0);
+	
 
-	while (!quit) {
+	while (counter < count) {
 		SDL_PollEvent(&event);
-		switch (event.type) {
-		case SDL_QUIT:
-			quit = true;
-			break;
-		}
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
-		SDL_SetRenderDrawColor(renderer, 0, 150, 175, 255);
+		SDL_SetRenderDrawColor(rendererPrey, 0, 0, 255, 125);
+		SDL_RenderClear(rendererPrey);
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				if (newGrid[x][y].value) {
-					SDL_RenderDrawPoint(renderer, x, y);
+				if (newGrid[x][y].value > 0) {
+					SDL_SetRenderDrawColor(rendererPrey, 0, 255, 0, 255);
+					SDL_RenderDrawPoint(rendererPrey, x, y);
+				} else if (newGrid[x][y].value < 0) {
+					
+					SDL_SetRenderDrawColor(rendererPrey, 255, 0, 0, 255);
+					SDL_RenderDrawPoint(rendererPrey, x, y);
 				}
 			}
 		}
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(rendererPrey);
 	}
-
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	*/
+
 }

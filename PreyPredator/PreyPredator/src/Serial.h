@@ -10,5 +10,5 @@ public:
 		: Simulator(width, height, preyPercent, predPercent, randomSeed) {}
 
 	void PopulateGrid() override;
-	void DrawSimToScreen() override;
+	void DrawSimToScreen(int count) override;
 };
