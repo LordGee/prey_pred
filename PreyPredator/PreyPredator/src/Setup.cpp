@@ -35,8 +35,8 @@ void Setup::DisplaySelection() {
 	std::cout << "| 4.\t | Prey Percentage:\t\t| " << PREY_PERCENT << std::endl;
 	std::cout << "| 5.\t | Predator Percentage:\t\t| " << PRED_PERCENT << std::endl;
 	std::cout << "| 6.\t | Random Seed:\t\t\t| " << RANDOM_SEED << std::endl;
-	std::cout << "| 7.\t | Graphics Mode:\t\t\t| " << ((DRAW_GRAPHICS == 1) ? "YES" : "NO") << std::endl;
-	std::cout << "| 8.\t | Number of Iterations:\t\t| " << ITERATIONS << std::endl;
+	std::cout << "| 7.\t | Graphics Mode:\t\t| " << ((DRAW_GRAPHICS == 1) ? "YES" : "NO") << std::endl;
+	std::cout << "| 8.\t | Number of Iterations:\t| " << ITERATIONS << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Select an option to edit (1, 2, 3, 4, 5, 6, 7, 8) " << std::endl;

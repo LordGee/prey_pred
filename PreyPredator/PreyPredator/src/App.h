@@ -8,6 +8,7 @@ public:
 private:
 	Setup* setup;
 	Simulator* sim;
+	int m_IterationCount;
 
 protected:
 	// int WIDTH, HEIGHT;
