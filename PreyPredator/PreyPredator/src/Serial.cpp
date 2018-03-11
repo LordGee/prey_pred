@@ -4,22 +4,24 @@
 
 void Serial::PopulateGrid() {
 	srand(seed);
-	for (int x = 0; x < m_Width; x++) {
-		for (int y = 0; y < m_Height; y++) {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			float random = (float)(rand()) / (float)(RAND_MAX);
-			if (random < m_Prey) {
+			if (random < prey) {
 				newGrid[x][y].value = 1;
 				newGrid[x][y].age = 1;
-			}
-			else if (random < m_Prey + m_Pred) {
+			} else if (random < prey + pred) {
 				newGrid[x][y].value = -1;
 				newGrid[x][y].age = 1;
-			}
-			else {
+			} else {
 				newGrid[x][y].value = 0;
 				newGrid[x][y].age = 0;
 			}
 		}
 	}
 	int z = 0;
+}
+
+void Serial::DrawSimToScreen() {
+	
 }

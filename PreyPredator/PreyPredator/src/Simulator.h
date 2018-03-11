@@ -5,11 +5,12 @@
 class Simulator {
 public:
 	std::vector<std::vector<Cell>> newGrid;
-	int seed = 1978;
-	int m_Width, m_Height;
-	float m_Prey = 0.5f, m_Pred = 0.25f;
+	int width, height, seed;
+	float prey, pred;
 
 public:
-	Simulator(int width, int height);
-	 virtual void PopulateGrid() = 0;
+	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed);
+	virtual void PopulateGrid() = 0;
+	virtual void DrawSimToScreen() = 0;
+
 };
