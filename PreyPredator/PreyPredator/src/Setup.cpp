@@ -6,13 +6,13 @@
 Setup::Setup() {
 	// Set default values
 	PROJECT_TYPE = 0;
-	WIDTH = 1000;
-	HEIGHT = 1000;
+	WIDTH = 640;
+	HEIGHT = 480;
 	PREY_PERCENT = 50;
 	PRED_PERCENT = 25;
 	RANDOM_SEED = 1234;
 	DRAW_GRAPHICS = 1;
-	ITERATIONS = 10000;
+	ITERATIONS = 1000;
 	// Define diferent tyypes of projects
 	m_ProjectType.push_back("Serial");
 	m_ProjectType.push_back("OpenMP");
