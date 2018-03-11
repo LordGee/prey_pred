@@ -8,6 +8,14 @@ public:
 	int width, height, seed;
 	float prey, pred;
 
+	const int PREY_BREEDING = 2;
+	const int PRED_BREEDING = 3;
+
+	const int PREY_LIVE = 10;
+	const int PRED_LIVE = 20;
+
+	const float PRED_SUDDEN_DEATH = 0.31f;
+
 public:
 	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed);
 	virtual void PopulateGrid() = 0;

@@ -88,7 +88,7 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
 	printf("\t by Gordon Johnson (k1451760)\n\n");
 	printf(" -------------------------------------------\n");
-	printf(" | Stats            \t| Results            |\n");
+	printf(" | Statistic        \t| Results\n");
 	printf(" -------------------------------------------\n");
 	printf(" | Speed            \t| %f\n", time);
 	printf(" | Iteration Count  \t| %d\n", iteration);
@@ -99,6 +99,68 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 }
 
 void Serial::UpdateSimulation() {
-	
+	// generate COPY cell array
+		// Loop COPY to init and zero off values
+	std::vector<std::vector<Cell>> copyGrid = std::vector<std::vector<Cell>>(width);
+	for (int x = 0; x < width; x++) {
+		copyGrid[x] = std::vector<Cell>(height);
+	}
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			copyGrid[x][y].value = 0;
+			copyGrid[x][y].age = 0;
+		}
+	}
+
+	// loop through all cells and determin neighbour count
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			int preyCount = 0, predCount = 0;
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+					if (!(i == 0 && j == 0)) {
+						int xTest = x + i, yTest = y + j;
+						if (yTest < 0) { yTest = yTest + height; }
+						if (xTest < 0) { xTest = xTest + width; }
+						if (yTest >= height) { yTest = yTest - height; }
+						if (xTest >= width) { xTest = xTest - width; }
+						if (newGrid[xTest][yTest].value > 0) {
+							preyCount++;
+						} else if (newGrid[xTest][yTest].value < 0) {
+							predCount++;
+						}
+					}
+				}
+			}
+			// set current cell to new value depending on rules
+			if (newGrid[x][y].value > 0) {
+				copyGrid[x][y].age = newGrid[x][y].age + 1;
+				copyGrid[x][y].value = newGrid[x][y].value;
+				//manage prey
+				if (predCount >= 5) {
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+				}
+				if (preyCount == 8) {
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+				}
+				if (copyGrid[x][y].age > PREY_LIVE) {
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+				}
+				
+				
+			} else if (newGrid[x][y].value < 0) {
+				// manage predator
+
+			} else {
+				// manage empty space
+
+			}
+		}
+	}
+
+	// copy the COPY back to the main array
 }
 
