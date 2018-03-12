@@ -5,12 +5,14 @@
 class Simulator {
 public:
 	std::vector<std::vector<Cell>> newGrid;
-	//Cell** newGrid;
 	std::vector<std::vector<Cell>> copyGrid;
-	//Cell** copyGrid;
-
+	
 	int width, height, seed;
 	float prey, pred;
+
+	// stats
+	int livePrey, livePred, empty;
+	int deadPrey, deadPred;
 
 	const int PREY_BREEDING = 2;
 	const int PRED_BREEDING = 3;
@@ -29,6 +31,6 @@ public:
 	virtual void PopulateGrid() = 0;
 	virtual void DrawSimToScreen(const int COUNT) = 0;
 	virtual void RunSimNoDraw(const int COUNT) = 0;
-	virtual void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty) = 0;
+	virtual void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) = 0;
 	virtual void UpdateSimulation() = 0;
 };

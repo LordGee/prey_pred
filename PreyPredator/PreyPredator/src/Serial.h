@@ -9,6 +9,6 @@ public:
 	void PopulateGrid() override;
 	void DrawSimToScreen(const int COUNT) override;
 	void RunSimNoDraw(const int COUNT) override;
-	void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty) override;
+	void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) override;
 	void UpdateSimulation() override;
 };

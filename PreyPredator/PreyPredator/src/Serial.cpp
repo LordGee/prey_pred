@@ -24,7 +24,6 @@ void Serial::PopulateGrid() {
 
 void Serial::DrawSimToScreen(const int COUNT) {
 	int counter = 0;
-	int livePrey, livePred, empty;
 	clock_t t1, t2;
 	float timer;
 	SDL_Event event;
@@ -35,8 +34,9 @@ void Serial::DrawSimToScreen(const int COUNT) {
 	
 	while (counter < COUNT) {
 		t1 = clock();
-		UpdateSimulation();
 		livePrey = 0, livePred = 0, empty = 0;
+		deadPrey = 0, deadPred = 0;
+		UpdateSimulation();
 		SDL_PollEvent(&event);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
 		SDL_RenderClear(renderer);
@@ -59,7 +59,7 @@ void Serial::DrawSimToScreen(const int COUNT) {
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		UpdateStatistics(timer, counter, livePrey, livePred, empty);
+		UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 	}
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -67,13 +67,13 @@ void Serial::DrawSimToScreen(const int COUNT) {
 
 void Serial::RunSimNoDraw(const int COUNT) {
 	int counter = 0;
-	int livePrey, livePred, empty;
 	clock_t t1, t2;
 	float timer;
 	while (counter < COUNT) {
 		t1 = clock();
-		UpdateSimulation();
+		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
+		UpdateSimulation();
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				if (newGrid[x][y].value > 0) {
@@ -88,11 +88,11 @@ void Serial::RunSimNoDraw(const int COUNT) {
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		UpdateStatistics(timer, counter, livePrey, livePred, empty);
+		UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 	}
 }
 
-void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty) {
+void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
 	system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
 	printf("\t by Gordon Johnson (k1451760)\n\n");
@@ -101,16 +101,21 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 	printf(" -------------------------------------------\n");
 	printf(" | Speed            \t| %f\n", time);
 	printf(" | Iteration Count  \t| %d\n", iteration);
+	printf(" -------------------------------------------\n");
 	printf(" | Living Prey      \t| %d\n", lPrey);
+	printf(" | Dying Prey      \t| %d\n", dPrey);
+	printf(" -------------------------------------------\n");
 	printf(" | Living Predators \t| %d\n", lPred);
+	printf(" | Dying Predators \t| %d\n", dPred);
+	printf(" -------------------------------------------\n");
 	printf(" | Empty Cells      \t| %d\n", empty);
+	printf(" | Total Cells      \t| %d\n", empty + lPrey + lPred);
 	printf(" -------------------------------------------\n");
 }
 
 void Serial::UpdateSimulation() {
 	// generate COPY cell array
 		// Loop COPY to init and zero off values
-	int countSudden = 0;
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			copyGrid[x][y].value = 0;
@@ -150,6 +155,7 @@ void Serial::UpdateSimulation() {
 				if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
+					deadPrey++;
 				} else {
 					copyGrid[x][y].value = newGrid[x][y].value;
 					copyGrid[x][y].age = newGrid[x][y].age + 1;
@@ -160,10 +166,10 @@ void Serial::UpdateSimulation() {
 				if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
 					if (random <= PRED_SUDDEN_DEATH) {
 						int z = 0;
-						countSudden++;
 					}
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
+					deadPred++;
 				} else {
 					copyGrid[x][y].value = newGrid[x][y].value;
 					copyGrid[x][y].age = newGrid[x][y].age + 1;
@@ -189,6 +195,5 @@ void Serial::UpdateSimulation() {
 			newGrid[x][y] = copyGrid[x][y];
 		}
 	}
-	printf("%d\n", countSudden);
 }
 

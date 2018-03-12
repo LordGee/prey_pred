@@ -6,13 +6,10 @@ width(width), height(height), seed(randomSeed) {
 	pred = (float)predPercent / 100.0f;
 	newGrid = std::vector<std::vector<Cell>>(width);
 	copyGrid = std::vector<std::vector<Cell>>(width);
-	//newGrid = (Cell**)malloc(sizeof(Cell*) *width);
-	//copyGrid = (Cell**)malloc(sizeof(Cell*) *width);
+	
 	for (int x = 0; x < width; x++) {
 		newGrid[x] = std::vector<Cell>(height);
 		copyGrid[x] = std::vector<Cell>(height);
-		//newGrid[x] = (Cell*)malloc(sizeof(Cell) *height);
-		//copyGrid[x] = (Cell*)malloc(sizeof(Cell) *height);
 	}
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
