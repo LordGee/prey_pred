@@ -267,6 +267,10 @@
     <Library Include="res\sdl\lib\x86\SDL2test.lib" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\mpi\inc\mpi.f90" />
+    <None Include="res\sdl\inc\SDL_config.h.cmake" />
+    <None Include="res\sdl\inc\SDL_config.h.in" />
+    <None Include="res\sdl\inc\SDL_config_macosx.h.orig" />
     <None Include="res\sdl\lib\x64\SDL2.dll" />
     <None Include="res\sdl\lib\x86\SDL2.dll" />
     <None Include="SDL2.dll" />

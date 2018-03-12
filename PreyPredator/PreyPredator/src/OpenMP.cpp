@@ -12,12 +12,10 @@ void OpenMP::PopulateGrid() {
 			if (random < prey) {
 				newGrid[x][y].value = 1;
 				newGrid[x][y].age = 1;
-			}
-			else if (random < prey + pred) {
+			} else if (random < prey + pred) {
 				newGrid[x][y].value = -1;
 				newGrid[x][y].age = 1;
-			}
-			else {
+			} else {
 				newGrid[x][y].value = 0;
 				newGrid[x][y].age = 0;
 			}
@@ -77,14 +75,20 @@ void OpenMP::RunSimNoDraw(const int COUNT) {
 		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
 		UpdateSimulation();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (newGrid[x][y].value > 0) {
-					livePrey++;
-				} else if (newGrid[x][y].value < 0) {
-					livePred++;
-				} else {
-					empty++;
+#pragma omp parallel num_threads(NO_THREADS)
+		{
+#pragma omp for
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					if (newGrid[x][y].value > 0) {
+						livePrey++;
+					}
+					else if (newGrid[x][y].value < 0) {
+						livePred++;
+					}
+					else {
+						empty++;
+					}
 				}
 			}
 		}
