@@ -1,5 +1,6 @@
 #pragma once
 #include "Serial.h"
+#include "OpenMP.h"
 #include "Setup.h"
 
 class App {

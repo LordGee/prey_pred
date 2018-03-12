@@ -4,10 +4,10 @@
 
 class Simulator {
 public:
-	//std::vector<std::vector<Cell>> newGrid;
-	Cell** newGrid;
-	//std::vector<std::vector<Cell>> copyGrid;
-	Cell** copyGrid;
+	std::vector<std::vector<Cell>> newGrid;
+	//Cell** newGrid;
+	std::vector<std::vector<Cell>> copyGrid;
+	//Cell** copyGrid;
 
 	int width, height, seed;
 	float prey, pred;
@@ -17,6 +17,7 @@ public:
 
 	const int NO_BREEDING = 4;
 	const int NO_AGE = 3;
+	const int NO_WITNESSES = 4;
 
 	const int PREY_LIVE = 10;
 	const int PRED_LIVE = 20;

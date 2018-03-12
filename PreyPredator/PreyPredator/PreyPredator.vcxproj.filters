@@ -297,6 +297,9 @@
     <ClInclude Include="src\Cell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\OpenMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="res\mpi\lib\x86\msmpi.lib" />
@@ -333,6 +336,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Serial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenMP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

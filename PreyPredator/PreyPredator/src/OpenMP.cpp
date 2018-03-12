@@ -1,9 +1,9 @@
-#include "Serial.h"
+#include "OpenMP.h"
 #include <cstdlib>
 #include "SDL.h"
 #include <ctime>
 
-void Serial::PopulateGrid() {
+void OpenMP::PopulateGrid() {
 	srand(seed);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
@@ -11,10 +11,12 @@ void Serial::PopulateGrid() {
 			if (random < prey) {
 				newGrid[x][y].value = 1;
 				newGrid[x][y].age = 1;
-			} else if (random < prey + pred) {
+			}
+			else if (random < prey + pred) {
 				newGrid[x][y].value = -1;
 				newGrid[x][y].age = 1;
-			} else {
+			}
+			else {
 				newGrid[x][y].value = 0;
 				newGrid[x][y].age = 0;
 			}
@@ -22,7 +24,7 @@ void Serial::PopulateGrid() {
 	}
 }
 
-void Serial::DrawSimToScreen(const int COUNT) {
+void OpenMP::DrawSimToScreen(const int COUNT) {
 	int counter = 0;
 	int livePrey, livePred, empty;
 	clock_t t1, t2;
@@ -32,7 +34,7 @@ void Serial::DrawSimToScreen(const int COUNT) {
 	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	
+
 	while (counter < COUNT) {
 		t1 = clock();
 		UpdateSimulation();
@@ -46,11 +48,13 @@ void Serial::DrawSimToScreen(const int COUNT) {
 					SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 					SDL_RenderDrawPoint(renderer, x, y);
 					livePrey++;
-				} else if (newGrid[x][y].value < 0) {
+				}
+				else if (newGrid[x][y].value < 0) {
 					SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 					SDL_RenderDrawPoint(renderer, x, y);
 					livePred++;
-				} else {
+				}
+				else {
 					empty++;
 				}
 			}
@@ -65,7 +69,7 @@ void Serial::DrawSimToScreen(const int COUNT) {
 	SDL_Quit();
 }
 
-void Serial::RunSimNoDraw(const int COUNT) {
+void OpenMP::RunSimNoDraw(const int COUNT) {
 	int counter = 0;
 	int livePrey, livePred, empty;
 	clock_t t1, t2;
@@ -78,9 +82,11 @@ void Serial::RunSimNoDraw(const int COUNT) {
 			for (int y = 0; y < height; y++) {
 				if (newGrid[x][y].value > 0) {
 					livePrey++;
-				} else if (newGrid[x][y].value < 0) {
+				}
+				else if (newGrid[x][y].value < 0) {
 					livePred++;
-				} else {
+				}
+				else {
 					empty++;
 				}
 			}
@@ -92,7 +98,7 @@ void Serial::RunSimNoDraw(const int COUNT) {
 	}
 }
 
-void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty) {
+void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty) {
 	system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
 	printf("\t by Gordon Johnson (k1451760)\n\n");
@@ -107,9 +113,9 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 	printf(" -------------------------------------------\n");
 }
 
-void Serial::UpdateSimulation() {
+void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
-		// Loop COPY to init and zero off values
+	// Loop COPY to init and zero off values
 	int countSudden = 0;
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
@@ -135,7 +141,8 @@ void Serial::UpdateSimulation() {
 							if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
 								preyAge++;
 							}
-						} else if (newGrid[xTest][yTest].value < 0) {
+						}
+						else if (newGrid[xTest][yTest].value < 0) {
 							predCount++;
 							if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
 								predAge++;
@@ -150,11 +157,13 @@ void Serial::UpdateSimulation() {
 				if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
-				} else {
+				}
+				else {
 					copyGrid[x][y].value = newGrid[x][y].value;
 					copyGrid[x][y].age = newGrid[x][y].age + 1;
 				}
-			} else if (newGrid[x][y].value < 0) {
+			}
+			else if (newGrid[x][y].value < 0) {
 				// manage predator
 				float random = (float)(rand()) / (float)(RAND_MAX);
 				if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
@@ -164,19 +173,23 @@ void Serial::UpdateSimulation() {
 					}
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
-				} else {
+				}
+				else {
 					copyGrid[x][y].value = newGrid[x][y].value;
 					copyGrid[x][y].age = newGrid[x][y].age + 1;
 				}
-			} else {
+			}
+			else {
 				// manage empty space
 				if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
 					copyGrid[x][y].value = 1;
 					copyGrid[x][y].age = 1;
-				} else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+				}
+				else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
 					copyGrid[x][y].value = -1;
 					copyGrid[x][y].age = 1;
-				} else {
+				}
+				else {
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
 				}

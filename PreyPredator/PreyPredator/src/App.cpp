@@ -9,6 +9,9 @@ App::App() {
 	case 0:
 		sim = new Serial(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
 		break;
+	case 1:
+		sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
+		break;
 	}
 
 	sim->PopulateGrid();
