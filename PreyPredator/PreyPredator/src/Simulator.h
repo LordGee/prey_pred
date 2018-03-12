@@ -1,5 +1,6 @@
 #pragma once
 #include "Cell.h"
+#include "SDL.h"
 #include <vector>
 
 class Simulator {

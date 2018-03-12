@@ -1,6 +1,5 @@
 #include "Serial.h"
 #include <cstdlib>
-#include "SDL.h"
 #include <ctime>
 
 void Serial::PopulateGrid() {

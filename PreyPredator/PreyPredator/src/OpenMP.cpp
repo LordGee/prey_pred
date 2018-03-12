@@ -1,23 +1,26 @@
 #include "OpenMP.h"
 #include <cstdlib>
-#include "SDL.h"
 #include <ctime>
 #include "omp.h"
 
 void OpenMP::PopulateGrid() {
 	srand(seed);
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			float random = (float)(rand()) / (float)(RAND_MAX);
-			if (random < prey) {
-				newGrid[x][y].value = 1;
-				newGrid[x][y].age = 1;
-			} else if (random < prey + pred) {
-				newGrid[x][y].value = -1;
-				newGrid[x][y].age = 1;
-			} else {
-				newGrid[x][y].value = 0;
-				newGrid[x][y].age = 0;
+#pragma omp parallel num_threads(NO_THREADS)
+	{
+#pragma omp for
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				float random = (float)(rand()) / (float)(RAND_MAX);
+				if (random < prey) {
+					newGrid[x][y].value = 1;
+					newGrid[x][y].age = 1;
+				} else if (random < prey + pred) {
+					newGrid[x][y].value = -1;
+					newGrid[x][y].age = 1;
+				} else {
+					newGrid[x][y].value = 0;
+					newGrid[x][y].age = 0;
+				}
 			}
 		}
 	}
@@ -123,16 +126,19 @@ void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
 	// Loop COPY to init and zero off values
-#pragma omp parallel num_threads(NO_THREADS)
+	int tick = 0;
+#pragma omp parallel num_threads(NO_THREADS) shared(tick)
 	{
-#pragma omp for
+#pragma omp for reduction (+: tick)
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				copyGrid[x][y].value = 0;
 				copyGrid[x][y].age = 0;
+				tick++;
 			}
 		}
 	}
+	printf("%d", tick);
 	// loop through all cells and determin neighbour count
 #pragma omp parallel num_threads(NO_THREADS)
 	{
