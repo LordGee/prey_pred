@@ -113,10 +113,10 @@ void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 	printf(" | Iteration Count  \t| %d\n", iteration);
 	printf(" -------------------------------------------\n");
 	printf(" | Living Prey      \t| %d\n", lPrey);
-	printf(" | Dying Prey      \t| %d\n", dPrey);
+	printf(" | Dying Prey       \t| %d\n", dPrey);
 	printf(" -------------------------------------------\n");
 	printf(" | Living Predators \t| %d\n", lPred);
-	printf(" | Dying Predators \t| %d\n", dPred);
+	printf(" | Dying Predators  \t| %d\n", dPred);
 	printf(" -------------------------------------------\n");
 	printf(" | Empty Cells      \t| %d\n", empty);
 	printf(" | Total Cells      \t| %d\n", empty + lPrey + lPred);
@@ -217,6 +217,7 @@ void OpenMP::UpdateSimulation() {
 			}
 		}
 	}
+#pragma omp barrier
 	// copy the COPY back to the main array
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {

@@ -273,7 +273,12 @@
     <None Include="res\sdl\inc\SDL_config_macosx.h.orig" />
     <None Include="res\sdl\lib\x64\SDL2.dll" />
     <None Include="res\sdl\lib\x86\SDL2.dll" />
-    <None Include="SDL2.dll" />
+    <None Include="SDL2.dll">
+      <DeploymentContent>true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
