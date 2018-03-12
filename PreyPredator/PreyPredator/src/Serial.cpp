@@ -20,7 +20,6 @@ void Serial::PopulateGrid() {
 			}
 		}
 	}
-	int z = 0;
 }
 
 void Serial::DrawSimToScreen(const int COUNT) {
@@ -36,6 +35,7 @@ void Serial::DrawSimToScreen(const int COUNT) {
 	
 	while (counter < COUNT) {
 		t1 = clock();
+		UpdateSimulation();
 		livePrey = 0, livePred = 0, empty = 0;
 		SDL_PollEvent(&event);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
@@ -72,10 +72,19 @@ void Serial::RunSimNoDraw(const int COUNT) {
 	float timer;
 	while (counter < COUNT) {
 		t1 = clock();
+		UpdateSimulation();
 		livePrey = 0, livePred = 0, empty = 0;
-
-		// run sim
-
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (newGrid[x][y].value > 0) {
+					livePrey++;
+				} else if (newGrid[x][y].value < 0) {
+					livePred++;
+				} else {
+					empty++;
+				}
+			}
+		}
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
@@ -101,10 +110,7 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 void Serial::UpdateSimulation() {
 	// generate COPY cell array
 		// Loop COPY to init and zero off values
-	std::vector<std::vector<Cell>> copyGrid = std::vector<std::vector<Cell>>(width);
-	for (int x = 0; x < width; x++) {
-		copyGrid[x] = std::vector<Cell>(height);
-	}
+
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			copyGrid[x][y].value = 0;
@@ -115,7 +121,7 @@ void Serial::UpdateSimulation() {
 	// loop through all cells and determin neighbour count
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			int preyCount = 0, predCount = 0;
+			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
 			for (int i = -1; i < 2; i++) {
 				for (int j = -1; j < 2; j++) {
 					if (!(i == 0 && j == 0)) {
@@ -126,8 +132,14 @@ void Serial::UpdateSimulation() {
 						if (xTest >= width) { xTest = xTest - width; }
 						if (newGrid[xTest][yTest].value > 0) {
 							preyCount++;
+							if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
+								preyAge++;
+							}
 						} else if (newGrid[xTest][yTest].value < 0) {
 							predCount++;
+							if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
+								predAge++;
+							}
 						}
 					}
 				}
@@ -137,30 +149,42 @@ void Serial::UpdateSimulation() {
 				copyGrid[x][y].age = newGrid[x][y].age + 1;
 				copyGrid[x][y].value = newGrid[x][y].value;
 				//manage prey
-				if (predCount >= 5) {
+				if (predCount >= 5 || preyCount == 8 || copyGrid[x][y].age > PREY_LIVE) {
 					copyGrid[x][y].value = 0;
 					copyGrid[x][y].age = 0;
 				}
-				if (preyCount == 8) {
-					copyGrid[x][y].value = 0;
-					copyGrid[x][y].age = 0;
-				}
-				if (copyGrid[x][y].age > PREY_LIVE) {
-					copyGrid[x][y].value = 0;
-					copyGrid[x][y].age = 0;
-				}
-				
-				
 			} else if (newGrid[x][y].value < 0) {
+				copyGrid[x][y].age = newGrid[x][y].age + 1;
+				copyGrid[x][y].value = newGrid[x][y].value;
 				// manage predator
-
+				srand(time(NULL));
+				float random = (float)(rand()) / (float)(RAND_MAX);				
+				if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
+					if (random <= 0.1f) {
+						int z = 0;
+					}
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+				}
 			} else {
+				copyGrid[x][y].value = 0;
+				copyGrid[x][y].age = 0;
 				// manage empty space
-
+				if (preyCount >= NO_BREEDING && preyAge >= NO_AGE) {
+					copyGrid[x][y].value = 1;
+					copyGrid[x][y].age = 1;
+				} else if (predCount >= NO_BREEDING && predAge >= NO_AGE) {
+					copyGrid[x][y].value = -1;
+					copyGrid[x][y].age = 1;
+				}
 			}
 		}
 	}
-
 	// copy the COPY back to the main array
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			newGrid[x][y] = copyGrid[x][y];
+		}
+	}
 }
 
