@@ -177,8 +177,7 @@ void OpenMP::UpdateSimulation() {
 						copyGrid[x][y].value = 0;
 						copyGrid[x][y].age = 0;
 						deadPrey++;
-					}
-					else {
+					} else {
 						copyGrid[x][y].value = newGrid[x][y].value;
 						copyGrid[x][y].age = newGrid[x][y].age + 1;
 					}
@@ -193,13 +192,11 @@ void OpenMP::UpdateSimulation() {
 						copyGrid[x][y].value = 0;
 						copyGrid[x][y].age = 0;
 						deadPred++;
-					}
-					else {
+					} else {
 						copyGrid[x][y].value = newGrid[x][y].value;
 						copyGrid[x][y].age = newGrid[x][y].age + 1;
 					}
-				}
-				else {
+				} else {
 					// manage empty space
 					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
 						copyGrid[x][y].value = 1;
@@ -208,8 +205,7 @@ void OpenMP::UpdateSimulation() {
 					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
 						copyGrid[x][y].value = -1;
 						copyGrid[x][y].age = 1;
-					}
-					else {
+					} else {
 						copyGrid[x][y].value = 0;
 						copyGrid[x][y].age = 0;
 					}
