@@ -245,6 +245,7 @@
     <ClInclude Include="res\sdl\inc\SDL_vulkan.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Cell.h" />
+    <ClInclude Include="src\msMPI.h" />
     <ClInclude Include="src\OpenMP.h" />
     <ClInclude Include="src\Serial.h" />
     <ClInclude Include="src\Setup.h" />

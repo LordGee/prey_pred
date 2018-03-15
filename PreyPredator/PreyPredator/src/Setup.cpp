@@ -13,11 +13,15 @@ Setup::Setup() {
 	RANDOM_SEED = 1234;
 	DRAW_GRAPHICS = 1;
 	ITERATIONS = 100000;
+	THREADS = 2;
+	PROCESSORS = 2;
 	// Define diferent tyypes of projects
 	m_ProjectType.push_back("Serial");
 	m_ProjectType.push_back("OpenMP");
 	m_ProjectType.push_back("MS MPI");
 	m_ProjectType.push_back("Hybrid");
+	// exefilename = "mpiexec -n 2 PreyPredator.exe";
+	exefilename = "run.bat";
 }
 
 void Setup::DisplaySelection() {
@@ -131,17 +135,26 @@ void Setup::EditOptions(int value) {
 void Setup::SelectProjectType() {
 	std::cout << std::endl;
 	std::cout << "Select type of project to run:" << std::endl;
-	for (int i = 0; i < m_ProjectType.size(); i++) {
+	int typeSize = 0;
+	if (isMPI) {
+		typeSize = m_ProjectType.size();
+	} else {
+		typeSize = 2;
+	}
+	for (int i = 0; i < typeSize; i++) {
 		std::cout << "\t" << i + 1 << ". \t" << m_ProjectType[i] << std::endl;
 	}
 	std::cout << ">>> ";
 	int tempValue = -1;
 	std::cin >> tempValue;
 	IncorrectValueEntry(tempValue, std::cin.fail());
-	while (tempValue < 1 || tempValue > m_ProjectType.size()) {
+	while (tempValue < 1 || tempValue > typeSize) {
 		tempValue = QuestionAnswer("Choose one of the above options only...");
 	}
 	PROJECT_TYPE = tempValue - 1;
+	if (tempValue > 2) {
+		// system("run.bat");
+	}
 }
 
 void Setup::IncorrectValueEntry(int& value, bool fail) {

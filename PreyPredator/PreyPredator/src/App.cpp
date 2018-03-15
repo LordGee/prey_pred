@@ -1,18 +1,35 @@
 #include "App.h"
+#include "mpi.h"
 #include <cstdlib>
 
-App::App() {
-	setup = new Setup;
-	setup->DisplaySelection();
+App::App(int id, int proc) {
+	InfoMPI info;
+	info.rank = id;
+	info.noProcs = proc;
+	if (info.rank == 0) {
+		printf("Rank = %d", info.rank);
+		setup = new Setup;
+		if (info.noProcs > 1) {
+			setup->isMPI = true;
+			setup->PROJECT_TYPE = 2;
+		} else {
+			setup->isMPI = false;
+		}
 
-	switch (setup->PROJECT_TYPE) {
-	case 0:
-		sim = new Serial(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
-		break;
-	case 1:
-		sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
-		break;
+		setup->DisplaySelection();
+		switch (setup->PROJECT_TYPE) {
+		case 0:
+			sim = new Serial(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
+			break;
+		case 1:
+			sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
+			break;
+		case 2:
+			sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED);
+			break;
+		}
 	}
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	sim->PopulateGrid();
 
