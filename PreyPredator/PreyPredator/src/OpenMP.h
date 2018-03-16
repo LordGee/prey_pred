@@ -1,12 +1,10 @@
 #pragma once
 #include "Simulator.h"
 
-#define NUM_THREADS 4
-
 class OpenMP : public Simulator {
 public:
-	OpenMP(int width, int height, int preyPercent, int predPercent, int randomSeed)
-		: Simulator(width, height, preyPercent, predPercent, randomSeed) {}
+	OpenMP(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads)
+		: Simulator(width, height, preyPercent, predPercent, randomSeed, threads) {}
 
 	void PopulateGrid() override;
 	void DrawSimToScreen(const int COUNT) override;

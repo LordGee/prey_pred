@@ -3,8 +3,8 @@
 
 class Serial : public Simulator {
 public:
-	Serial(int width, int height, int preyPercent, int predPercent, int randomSeed)
-		: Simulator(width, height, preyPercent, predPercent, randomSeed) {}
+	Serial(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads)
+		: Simulator(width, height, preyPercent, predPercent, randomSeed, threads) {}
 
 	void PopulateGrid() override;
 	void DrawSimToScreen(const int COUNT) override;

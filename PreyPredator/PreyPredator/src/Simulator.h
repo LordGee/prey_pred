@@ -3,17 +3,16 @@
 #include "SDL.h"
 #include <vector>
 
+static int livePrey, livePred, empty;
+static int deadPrey, deadPred;
+
 class Simulator {
 public:
 	std::vector<std::vector<Cell>> newGrid;
 	std::vector<std::vector<Cell>> copyGrid;
 	
-	int width, height, seed;
+	int width, height, seed, numThreads;
 	float prey, pred;
-
-	// stats
-	int livePrey, livePred, empty;
-	int deadPrey, deadPred;
 
 	const int PREY_BREEDING = 2;
 	const int PRED_BREEDING = 3;
@@ -28,7 +27,7 @@ public:
 	const float PRED_SUDDEN_DEATH = 0.031f;
 
 public:
-	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed);
+	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads);
 	virtual void PopulateGrid() = 0;
 	virtual void DrawSimToScreen(const int COUNT) = 0;
 	virtual void RunSimNoDraw(const int COUNT) = 0;

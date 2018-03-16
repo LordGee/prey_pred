@@ -1,6 +1,6 @@
 #include "Simulator.h"
 
-Simulator::Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed) :
+Simulator::Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads) :
 width(width), height(height), seed(randomSeed) {
 	prey = (float)preyPercent / 100.0f;
 	pred = (float)predPercent / 100.0f;
@@ -17,6 +17,6 @@ width(width), height(height), seed(randomSeed) {
 			newGrid[x][y].age = 0;
 		}
 	}
-	int z = 0;
+	numThreads = threads;
 }
 
