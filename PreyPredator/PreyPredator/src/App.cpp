@@ -29,7 +29,10 @@ App::App(int id, int proc) {
 			break;
 		}
 	}
-	MPI_Barrier(MPI_COMM_WORLD);
+	if (info.noProcs > 1) {
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
+	
 
 	sim->PopulateGrid();
 

@@ -284,6 +284,7 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\msMPI.cpp" />
     <ClCompile Include="src\OpenMP.cpp" />
     <ClCompile Include="src\Serial.cpp" />
     <ClCompile Include="src\Setup.cpp" />
