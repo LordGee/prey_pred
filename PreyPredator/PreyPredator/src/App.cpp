@@ -7,11 +7,12 @@ App::App(int id, int proc) {
 	info.rank = id;
 	info.noProcs = proc;
 	if (info.rank == 0) {
-		printf("Rank = %d", info.rank);
 		setup = new Setup;
 		if (info.noProcs > 1) {
 			setup->isMPI = true;
 			setup->PROJECT_TYPE = 2;
+			setup->PROCESSORS = info.noProcs;
+
 		} else {
 			setup->isMPI = false;
 		}

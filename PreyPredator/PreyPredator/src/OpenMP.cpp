@@ -5,7 +5,7 @@
 
 void OpenMP::PopulateGrid() {
 	srand(seed);
-#pragma omp parallel num_threads(NO_THREADS)
+#pragma omp parallel num_threads(NUM_THREADS)
 	{
 #pragma omp for
 		for (int x = 0; x < width; x++) {
@@ -78,7 +78,7 @@ void OpenMP::RunSimNoDraw(const int COUNT) {
 		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
 		UpdateSimulation();
-#pragma omp parallel num_threads(NO_THREADS)
+#pragma omp parallel num_threads(NUM_THREADS)
 		{
 #pragma omp for
 			for (int x = 0; x < width; x++) {
@@ -127,7 +127,7 @@ void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
 	// Loop COPY to init and zero off values
 	int tick = 0;
-#pragma omp parallel num_threads(NO_THREADS) shared(tick)
+#pragma omp parallel num_threads(NUM_THREADS) shared(tick)
 	{
 #pragma omp for reduction (+: tick)
 		for (int x = 0; x < width; x++) {
@@ -140,7 +140,7 @@ void OpenMP::UpdateSimulation() {
 	}
 	printf("%d", tick);
 	// loop through all cells and determin neighbour count
-#pragma omp parallel num_threads(NO_THREADS)
+#pragma omp parallel num_threads(NUM_THREADS)
 	{
 		srand(time(NULL));
 #pragma omp for
@@ -215,9 +215,13 @@ void OpenMP::UpdateSimulation() {
 	}
 #pragma omp barrier
 	// copy the COPY back to the main array
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			newGrid[x][y] = copyGrid[x][y];
+#pragma omp parallel num_threads(NUM_THREADS)
+	{
+#pragma omp for
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrid[x][y] = copyGrid[x][y];
+			}
 		}
 	}
 }

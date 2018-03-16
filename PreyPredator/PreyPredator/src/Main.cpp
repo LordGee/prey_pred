@@ -13,15 +13,11 @@ int main(int argc, char* argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &info.rank);
 	MPI_Barrier(MPI_COMM_WORLD);
 	
-	if (info.noProcs == 1) {
-		MPI_Finalize();
-	}
-
-	printf("My processors  =  %d\n", info.noProcs);
+	if (info.noProcs <= 1) { MPI_Finalize(); }
 
 	App* app = new App(info.rank, info.noProcs);
-	
-	MPI_Finalize();
+
+	if (info.noProcs > 1) {	MPI_Finalize(); }
 	system("PAUSE");
 	delete app;
 

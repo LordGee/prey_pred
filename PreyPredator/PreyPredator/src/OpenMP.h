@@ -1,7 +1,7 @@
 #pragma once
 #include "Simulator.h"
 
-#define NO_THREADS 4
+#define NUM_THREADS 4
 
 class OpenMP : public Simulator {
 public:

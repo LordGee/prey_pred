@@ -19,5 +19,6 @@ private:
 	void SelectProjectType();
 	void IncorrectValueEntry(int& value, bool fail);
 	int QuestionAnswer(const char* question);
+	std::string GenerateExeLauncher();
 	
 };
