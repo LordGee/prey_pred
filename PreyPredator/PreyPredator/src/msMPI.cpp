@@ -3,30 +3,12 @@
 #include <ctime>
 
 void MsMPI::PopulateGrid() {
-	printf("I am ID = %d Width = %d", info.rank, width);
+	printf("\n*** (msMPI.cpp) Rank %d out of %d ***\n", info.rank, info.noProcs);
 	srand(seed);
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			float random = (float)(rand()) / (float)(RAND_MAX);
-			if (random < prey) {
-				newGrid[x][y].value = 1;
-				newGrid[x][y].age = 1;
-			} else if (random < prey + pred) {
-				newGrid[x][y].value = -1;
-				newGrid[x][y].age = 1;
-			} else {
-				newGrid[x][y].value = 0;
-				newGrid[x][y].age = 0;
-			}
-		}
-	}
-
-	/*srand(seed);
 	if (info.noProcs > 1) {
-		contributionX = GetProcessorValue(width);
 		contributionY = GetProcessorValue(height);
 	}
-	printf("Rank %d", info.rank);
+
 	if (info.rank == 0) {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -43,7 +25,7 @@ void MsMPI::PopulateGrid() {
 				}
 				if (info.noProcs > 1) {
 					for (int p = 1; p < info.noProcs; p++) {
-						if (x > contributionX && x < contributionX * (p + 1) && y > contributionY && y < contributionY * (p + 1)) {
+						if (y > contributionY && y < contributionY * (p + 1)) {
 							if (info.rank == p) {
 								MPI_Send(&newGrid[x][y], 1, MPI_INT, p, x * y, MPI_COMM_WORLD);
 							}
@@ -64,7 +46,7 @@ void MsMPI::PopulateGrid() {
 				}
 			}
 		}
-	}*/
+	}
 }
 
 void MsMPI::DrawSimToScreen(const int COUNT) {
@@ -162,7 +144,6 @@ void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, in
 	printf(" | Empty Cells      \t| %d\n", empty);
 	printf(" | Total Cells      \t| %d\n", empty + lPrey + lPred);
 	printf(" -------------------------------------------\n");
-	printf("I am ID = %d Width = %d", info.rank, width);
 }
 
 void MsMPI::UpdateSimulation() {

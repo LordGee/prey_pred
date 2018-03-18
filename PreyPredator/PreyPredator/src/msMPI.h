@@ -15,6 +15,7 @@ public:
 	void RunSimNoDraw(const int COUNT) override;
 	void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) override;
 	void UpdateSimulation() override;
+
 	int GetProcessorValue(int value) {
 		int temp = abs(value / info.noProcs);
 		if (temp * info.noProcs != value) {
@@ -22,4 +23,5 @@ public:
 		}
 		return temp;
 	}
+
 };

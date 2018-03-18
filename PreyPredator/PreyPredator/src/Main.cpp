@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
 	// InfoMPI info;
 	
-	MPI_Init(&argc, &argv);
+
 	/*
 	int rankID, proc;
 	MPI_Comm_size(MPI_COMM_WORLD, &proc);
@@ -17,17 +17,16 @@ int main(int argc, char *argv[]) {
 	*/
 	
 	int rankID = 0, proc = 1;
+	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
 
+	printf("\n*** (Main.cpp) Rank %d out of %d ***\n", rankID, proc);
 	
-
-
 	App* app = new App(rankID, proc);
 	delete app;
 	
 	// MPI_Barrier(MPI_COMM_WORLD);
-	// You also need this when your program is about to exit
 	
 	system("PAUSE");
 	MPI_Finalize();

@@ -6,8 +6,9 @@ App::App(int id, int proc) {
 	//info.rank = id;
 	//info.noProcs = proc;
 	int rankID = id, procs = proc;
-	MPI_Comm_size(MPI_COMM_WORLD, &procs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
+	//MPI_Comm_size(MPI_COMM_WORLD, &procs);
+	//MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
+	printf("\n*** (App.cpp) Rank %d out of %d ***\n", rankID, procs);
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (rankID == 0) {
 		setup = new Setup;
@@ -22,7 +23,6 @@ App::App(int id, int proc) {
 		setup->DisplaySelection();
 	}
 	if (procs > 1) {
-		printf("I am rank %d", rankID);
 		MPI_Status status;
 		if (rankID != 0) {
 			setup = new Setup;
@@ -49,6 +49,7 @@ App::App(int id, int proc) {
 			MPI_Recv(&setup->PROCESSORS, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, &status);
 			MPI_Recv(&setup->PROJECT_TYPE, 1, MPI_INT, 0, 8, MPI_COMM_WORLD, &status);
 		}
+		
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	switch (setup->PROJECT_TYPE) {
@@ -64,10 +65,7 @@ App::App(int id, int proc) {
 		sim->info.rank = rankID;
 		break;
 	}
-	printf("*** Setup Complete ***");
-	//if (procs > 1) {
-	//	MPI_Barrier(MPI_COMM_WORLD);
-	//}
+	
 	
 	MPI_Barrier(MPI_COMM_WORLD);
 	sim->PopulateGrid();
