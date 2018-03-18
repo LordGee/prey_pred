@@ -1,34 +1,29 @@
 #include "App.h"
 #include <cstdlib>
 
-App::App(int id, int proc) {
-	//InfoMPI info;
-	//info.rank = id;
-	//info.noProcs = proc;
-	int rankID = id, procs = proc;
-	//MPI_Comm_size(MPI_COMM_WORLD, &procs);
-	//MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
-	printf("\n*** (App.cpp) Rank %d out of %d ***\n", rankID, procs);
+App::App(InfoMPI &info) {
+
+	std::cout << "\n*** (App.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
 	MPI_Barrier(MPI_COMM_WORLD);
-	if (rankID == 0) {
+	if (info.rank == 0) {
 		setup = new Setup;
-		if (procs > 1) {
+		if (info.noProcs > 1) {
 			setup->isMPI = true;
 			setup->PROJECT_TYPE = 2;
-			setup->PROCESSORS = procs;
+			setup->PROCESSORS = info.noProcs;
 
 		} else {
 			setup->isMPI = false;
 		}
 		setup->DisplaySelection();
 	}
-	if (procs > 1) {
+	if (info.noProcs > 1) {
 		MPI_Status status;
-		if (rankID != 0) {
+		if (info.rank != 0) {
 			setup = new Setup;
 		}
-		if (rankID == 0) {
-			for (int p = 1; p < procs; p++) {
+		if (info.rank == 0) {
+			for (int p = 1; p < info.noProcs; p++) {
 				MPI_Send(&setup->WIDTH, 1, MPI_INT, p, 1, MPI_COMM_WORLD);
 				MPI_Send(&setup->HEIGHT, 1, MPI_INT, p, 2, MPI_COMM_WORLD);
 				MPI_Send(&setup->PREY_PERCENT, 1, MPI_INT, p, 3, MPI_COMM_WORLD);
@@ -39,7 +34,7 @@ App::App(int id, int proc) {
 				MPI_Send(&setup->PROJECT_TYPE, 1, MPI_INT, p, 8, MPI_COMM_WORLD);
 			}
 		}
-		if (rankID != 0) {
+		if (info.rank != 0) {
 			MPI_Recv(&setup->WIDTH, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
 			MPI_Recv(&setup->HEIGHT, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
 			MPI_Recv(&setup->PREY_PERCENT, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
@@ -62,7 +57,7 @@ App::App(int id, int proc) {
 	case 2:
 		sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		sim->info.noProcs = setup->PROCESSORS;
-		sim->info.rank = rankID;
+		sim->info.rank = info.rank;
 		break;
 	}
 	

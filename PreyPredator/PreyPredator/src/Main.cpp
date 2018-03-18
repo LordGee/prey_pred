@@ -1,34 +1,26 @@
 #include <cstdlib>
 #include <cstdio>
 #include "App.h"
-#include <string>
+#include "mpi.h"
 
-int main(int argc, char *argv[]) {
-	// InfoMPI info;
+int main(int argc, char *argv[]) {	
+	MPI_Init(NULL, NULL);
+	//MPI_Init(&argc, &argv);
+	InfoMPI* info = new InfoMPI;
+	MPI_Comm_size(MPI_COMM_WORLD, &info->noProcs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &info->rank);
+
+	// Why does printf not work here? had to use std::cout
+	std::cout << "\n*** (Main.cpp) Rank " << info->rank << " out of " << info->noProcs << " ***\n" << std::endl;
+
 	
 
-	/*
-	int rankID, proc;
-	MPI_Comm_size(MPI_COMM_WORLD, &proc);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
-	printf("\nRank %d - %c \n", &argc, &argv);
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Finalize();
-	*/
-	
-	int rankID = 0, proc = 1;
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &proc);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
-
-	printf("\n*** (Main.cpp) Rank %d out of %d ***\n", rankID, proc);
-	
-	App* app = new App(rankID, proc);
+	App* app = new App(*info);
 	delete app;
-	
-	// MPI_Barrier(MPI_COMM_WORLD);
-	
-	system("PAUSE");
+	delete info;
+
 	MPI_Finalize();
+	system("PAUSE");
+	
 	return 0;
 }

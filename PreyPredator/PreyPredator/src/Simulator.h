@@ -2,6 +2,8 @@
 #include "Cell.h"
 #include "SDL.h"
 #include <vector>
+#include <ostream>
+#include <iostream>
 #include "mpi.h"
 
 static int livePrey, livePred, empty;
@@ -9,6 +11,11 @@ static int deadPrey, deadPred;
 
 struct InfoMPI {
 	int rank, noProcs;
+
+	InfoMPI() {
+		rank = -1;
+		noProcs = -1;
+	}
 };
 
 class Simulator {

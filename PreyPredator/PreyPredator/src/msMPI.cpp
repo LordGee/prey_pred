@@ -2,13 +2,12 @@
 #include <cstdlib>
 #include <ctime>
 
-void MsMPI::PopulateGrid() {
-	printf("\n*** (msMPI.cpp) Rank %d out of %d ***\n", info.rank, info.noProcs);
-	srand(seed);
-	if (info.noProcs > 1) {
-		contributionY = GetProcessorValue(height);
-	}
 
+void MsMPI::PopulateGrid() {
+	std::cout << "\n*** (msMPI.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
+	srand(seed);
+	contributionY = GetProcessorValue(height);
+	int processorCounter = 1;
 	if (info.rank == 0) {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -23,24 +22,24 @@ void MsMPI::PopulateGrid() {
 					newGrid[x][y].value = 0;
 					newGrid[x][y].age = 0;
 				}
-				if (info.noProcs > 1) {
-					for (int p = 1; p < info.noProcs; p++) {
-						if (y > contributionY && y < contributionY * (p + 1)) {
-							if (info.rank == p) {
-								MPI_Send(&newGrid[x][y], 1, MPI_INT, p, x * y, MPI_COMM_WORLD);
-							}
+				if (y > contributionY * processorCounter && y < contributionY * processorCounter + y) {
+					if (y >= contributionY * processorCounter) {
+						processorCounter++;
+						if (processorCounter > info.noProcs) {
+							break;
 						}
 					}
+					MPI_Send(&newGrid[x][y], 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
 				}
 			}
 		}
 	} else {
 		if (info.noProcs > 1) {
 			for (int p = 1; p < info.noProcs; p++) {
-				for (int x = contributionX * p; x < contributionX * p + contributionX; x++) {
-					for (int y = contributionY * p; y < contributionY * p + contributionY; y++) {
+				for (int x = 0; x < width; x++) {
+					for (int y = contributionY; y < contributionY * (p + 1); y++) {
 						if (info.rank == p) {
-							MPI_Recv(&newGrid[x][y], 1, MPI_INT, 0, x * y, MPI_COMM_WORLD, &status);
+							MPI_Recv(&newGrid[x][y], 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
 						}
 					}
 				}
@@ -144,21 +143,10 @@ void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, in
 	printf(" | Empty Cells      \t| %d\n", empty);
 	printf(" | Total Cells      \t| %d\n", empty + lPrey + lPred);
 	printf(" -------------------------------------------\n");
+	fflush(stdout);
 }
 
 void MsMPI::UpdateSimulation() {
-
-	//int initialized, finalized;
-	//int rankID, proc = 1;
-	//MPI_Initialized(&initialized);
-	//if (!initialized)
-	//	MPI_Init(NULL, NULL);
-
-	//MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
-
-	//MPI_Finalized(&finalized);
-	//if (!finalized)
-	//	MPI_Finalize();
 
 	// generate COPY cell array
 	// Loop COPY to init and zero off values

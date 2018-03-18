@@ -32,7 +32,7 @@ Setup::Setup() {
 }
 
 void Setup::DisplaySelection() {
-	//system("cls");
+	system("cls");
 	std::cout << "WELCOME TO THE PREY VS PREDATOR SIMULATOR" << std::endl;
 	std::cout << "\tby Gordon Johnson (k1451760)" << std::endl;
 	std::cout << std::endl;

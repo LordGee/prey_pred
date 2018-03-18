@@ -17,7 +17,7 @@ protected:
 	// int WIDTH, HEIGHT;
 
 public:
-	App(int id, int proc);
+	App(InfoMPI &info);
 	~App();
 
 };
