@@ -3,8 +3,8 @@
 
 class OpenMP : public Simulator {
 public:
-	OpenMP(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads)
-		: Simulator(width, height, preyPercent, predPercent, randomSeed, threads) {}
+	OpenMP(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads, int proc)
+		: Simulator(width, height, preyPercent, predPercent, randomSeed, threads, proc) {}
 
 	void PopulateGrid() override;
 	void DrawSimToScreen(const int COUNT) override;

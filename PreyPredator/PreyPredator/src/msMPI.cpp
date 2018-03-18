@@ -3,6 +3,7 @@
 #include <ctime>
 
 void MsMPI::PopulateGrid() {
+	printf("I am ID = %d Width = %d", info.rank, width);
 	srand(seed);
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
@@ -10,17 +11,60 @@ void MsMPI::PopulateGrid() {
 			if (random < prey) {
 				newGrid[x][y].value = 1;
 				newGrid[x][y].age = 1;
-			}
-			else if (random < prey + pred) {
+			} else if (random < prey + pred) {
 				newGrid[x][y].value = -1;
 				newGrid[x][y].age = 1;
-			}
-			else {
+			} else {
 				newGrid[x][y].value = 0;
 				newGrid[x][y].age = 0;
 			}
 		}
 	}
+
+	/*srand(seed);
+	if (info.noProcs > 1) {
+		contributionX = GetProcessorValue(width);
+		contributionY = GetProcessorValue(height);
+	}
+	printf("Rank %d", info.rank);
+	if (info.rank == 0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				float random = (float)(rand()) / (float)(RAND_MAX);
+				if (random < prey) {
+					newGrid[x][y].value = 1;
+					newGrid[x][y].age = 1;
+				} else if (random < prey + pred) {
+					newGrid[x][y].value = -1;
+					newGrid[x][y].age = 1;
+				} else {
+					newGrid[x][y].value = 0;
+					newGrid[x][y].age = 0;
+				}
+				if (info.noProcs > 1) {
+					for (int p = 1; p < info.noProcs; p++) {
+						if (x > contributionX && x < contributionX * (p + 1) && y > contributionY && y < contributionY * (p + 1)) {
+							if (info.rank == p) {
+								MPI_Send(&newGrid[x][y], 1, MPI_INT, p, x * y, MPI_COMM_WORLD);
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		if (info.noProcs > 1) {
+			for (int p = 1; p < info.noProcs; p++) {
+				for (int x = contributionX * p; x < contributionX * p + contributionX; x++) {
+					for (int y = contributionY * p; y < contributionY * p + contributionY; y++) {
+						if (info.rank == p) {
+							MPI_Recv(&newGrid[x][y], 1, MPI_INT, 0, x * y, MPI_COMM_WORLD, &status);
+						}
+					}
+				}
+			}
+		}
+	}*/
 }
 
 void MsMPI::DrawSimToScreen(const int COUNT) {
@@ -93,7 +137,9 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+		if (info.rank == 0) {
+			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+		}
 	}
 }
 
@@ -116,9 +162,23 @@ void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, in
 	printf(" | Empty Cells      \t| %d\n", empty);
 	printf(" | Total Cells      \t| %d\n", empty + lPrey + lPred);
 	printf(" -------------------------------------------\n");
+	printf("I am ID = %d Width = %d", info.rank, width);
 }
 
 void MsMPI::UpdateSimulation() {
+
+	//int initialized, finalized;
+	//int rankID, proc = 1;
+	//MPI_Initialized(&initialized);
+	//if (!initialized)
+	//	MPI_Init(NULL, NULL);
+
+	//MPI_Comm_rank(MPI_COMM_WORLD, &rankID);
+
+	//MPI_Finalized(&finalized);
+	//if (!finalized)
+	//	MPI_Finalize();
+
 	// generate COPY cell array
 	// Loop COPY to init and zero off values
 	for (int x = 0; x < width; x++) {

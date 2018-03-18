@@ -126,19 +126,16 @@ void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
 	// Loop COPY to init and zero off values
-	int tick = 0;
-#pragma omp parallel num_threads(numThreads) shared(tick)
+#pragma omp parallel num_threads(numThreads) 
 	{
-#pragma omp for reduction (+: tick)
+#pragma omp for
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				copyGrid[x][y].value = 0;
 				copyGrid[x][y].age = 0;
-				tick++;
 			}
 		}
 	}
-	printf("%d", tick);
 	// loop through all cells and determin neighbour count
 #pragma omp parallel num_threads(numThreads)
 	{

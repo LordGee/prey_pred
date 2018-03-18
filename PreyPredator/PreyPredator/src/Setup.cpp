@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
+#include <cstdlib>
 
 Setup::Setup() {
 	// Set default values
@@ -23,13 +24,15 @@ Setup::Setup() {
 	m_ProjectType.push_back("Hybrid");
 
 	/* File location depending on execution method (Comment out unused) */
-	// exefilename = "PreyPredator.exe"; // production mode
-	exefilename = "../bin/release/PreyPredator.exe"; // release mode run through VS
+	exefilename = "PreyPredator.exe"; // production mode
+	// exefilename = "../bin/release/PreyPredator.exe"; // release mode run through VS
 	// exefilename = "../bin/debug/PreyPredator.exe"; // debug mode run through VS
+
+	//exefilename = "../bin/debug/run.bat"; // debug mode run through VS
 }
 
 void Setup::DisplaySelection() {
-	system("cls");
+	//system("cls");
 	std::cout << "WELCOME TO THE PREY VS PREDATOR SIMULATOR" << std::endl;
 	std::cout << "\tby Gordon Johnson (k1451760)" << std::endl;
 	std::cout << std::endl;
@@ -171,6 +174,7 @@ void Setup::SelectProjectType() {
 				procValue = QuestionAnswer("Choose a sensible processor value between 1 and 32...");
 			}
 			PROCESSORS = procValue;
+
 			system(GenerateExeLauncher().c_str());
 		}
 	}

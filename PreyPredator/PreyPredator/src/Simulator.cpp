@@ -1,6 +1,6 @@
 #include "Simulator.h"
 
-Simulator::Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads) :
+Simulator::Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads, int proc) :
 width(width), height(height), seed(randomSeed) {
 	prey = (float)preyPercent / 100.0f;
 	pred = (float)predPercent / 100.0f;
@@ -18,5 +18,6 @@ width(width), height(height), seed(randomSeed) {
 		}
 	}
 	numThreads = threads;
+	numProc = proc;
 }
 

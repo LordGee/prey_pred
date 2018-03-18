@@ -2,16 +2,21 @@
 #include "Cell.h"
 #include "SDL.h"
 #include <vector>
+#include "mpi.h"
 
 static int livePrey, livePred, empty;
 static int deadPrey, deadPred;
+
+struct InfoMPI {
+	int rank, noProcs;
+};
 
 class Simulator {
 public:
 	std::vector<std::vector<Cell>> newGrid;
 	std::vector<std::vector<Cell>> copyGrid;
 	
-	int width, height, seed, numThreads;
+	int width, height, seed, numThreads, numProc;
 	float prey, pred;
 
 	const int PREY_BREEDING = 2;
@@ -26,11 +31,15 @@ public:
 
 	const float PRED_SUDDEN_DEATH = 0.031f;
 
+	MPI_Status status;
+	InfoMPI info;
+
 public:
-	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads);
+	Simulator(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads, int proc);
 	virtual void PopulateGrid() = 0;
 	virtual void DrawSimToScreen(const int COUNT) = 0;
 	virtual void RunSimNoDraw(const int COUNT) = 0;
 	virtual void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) = 0;
 	virtual void UpdateSimulation() = 0;
 };
+
