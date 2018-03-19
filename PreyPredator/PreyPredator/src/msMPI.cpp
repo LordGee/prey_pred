@@ -4,48 +4,62 @@
 
 
 void MsMPI::PopulateGrid() {
-	std::cout << "\n*** (msMPI.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
 	srand(seed);
-	contributionY = GetProcessorValue(height);
-	int processorCounter = 1;
-	if (info.rank == 0) {
+	int contributionY = GetProcessorValue(height);
+	int processorCounter = 1, tagCounter = 1;
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				float random = (float)(rand()) / (float)(RAND_MAX);
-				if (random < prey) {
-					newGrid[x][y].value = 1;
-					newGrid[x][y].age = 1;
-				} else if (random < prey + pred) {
-					newGrid[x][y].value = -1;
-					newGrid[x][y].age = 1;
-				} else {
-					newGrid[x][y].value = 0;
-					newGrid[x][y].age = 0;
-				}
-				if (y > contributionY * processorCounter && y < contributionY * processorCounter + y) {
-					if (y >= contributionY * processorCounter) {
-						processorCounter++;
-						if (processorCounter > info.noProcs) {
-							break;
-						}
+				if (info.rank == 0) {
+					float random = (float)(rand()) / (float)(RAND_MAX);
+					if (random < prey) {
+						newGrid[x][y].value = 1;
+						newGrid[x][y].age = 1;
 					}
-					MPI_Send(&newGrid[x][y], 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
-				}
-			}
-		}
-	} else {
-		if (info.noProcs > 1) {
-			for (int p = 1; p < info.noProcs; p++) {
-				for (int x = 0; x < width; x++) {
-					for (int y = contributionY; y < contributionY * (p + 1); y++) {
-						if (info.rank == p) {
-							MPI_Recv(&newGrid[x][y], 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
-						}
+					else if (random < prey + pred) {
+						newGrid[x][y].value = -1;
+						newGrid[x][y].age = 1;
+					}
+					else {
+						newGrid[x][y].value = 0;
+						newGrid[x][y].age = 0;
 					}
 				}
+				if (y >= (contributionY * processorCounter) + contributionY) {
+					processorCounter++;
+				}
+				if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
+					// std::cout << "Index " << y << " | Processor: " << processorCounter << " | Contribution: " << (contributionY * processorCounter) + contributionY << std::endl;(y * (x + 1))
+					if (info.rank == 0) {
+						MPI_Send(&newGrid[x][y].value, 1, MPI_INT, processorCounter, tagCounter, MPI_COMM_WORLD);
+						tagCounter++;
+						MPI_Send(&newGrid[x][y].age, 1, MPI_INT, processorCounter, tagCounter, MPI_COMM_WORLD);
+						tagCounter++;
+					}
+					if (info.rank == processorCounter) {
+						MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, tagCounter, MPI_COMM_WORLD, &status);
+						tagCounter++;
+						std::cout << "Status 1 - " << status.MPI_ERROR << " Rank: " << info.rank << " Tag: " << status.MPI_TAG << std::endl;
+						MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, tagCounter, MPI_COMM_WORLD, &status);
+						tagCounter++;
+						std::cout << "Status 2 - " << status.MPI_ERROR << " Rank: " << info.rank << " Tag: " << status.MPI_TAG << std::endl;
+					}
+					
+				}
 			}
+			processorCounter = 1;
 		}
+	 /*
+		for (int x = 0; x < width; x++) {
+			for (int y = contributionY * info.rank; y < (contributionY * info.rank) + contributionY; y++) {
+				
+				
+				
+				// std::cout << "RECIEVING: Index " << y << " | Processor: " << info.rank << " | Value: " << newGrid[x][y].value << std::endl;
+			}
+		
 	}
+	*/
+	std::cout << "\n*** (msMPI.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
 }
 
 void MsMPI::DrawSimToScreen(const int COUNT) {
@@ -63,31 +77,34 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 		livePrey = 0, livePred = 0, empty = 0;
 		deadPrey = 0, deadPred = 0;
 		UpdateSimulation();
-		SDL_PollEvent(&event);
-		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
-		SDL_RenderClear(renderer);
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (newGrid[x][y].value > 0) {
-					SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-					SDL_RenderDrawPoint(renderer, x, y);
-					livePrey++;
-				}
-				else if (newGrid[x][y].value < 0) {
-					SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-					SDL_RenderDrawPoint(renderer, x, y);
-					livePred++;
-				}
-				else {
-					empty++;
+		if (info.rank == 0) {
+			SDL_PollEvent(&event);
+			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
+			SDL_RenderClear(renderer);
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					if (newGrid[x][y].value > 0) {
+						SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+						SDL_RenderDrawPoint(renderer, x, y);
+						livePrey++;
+					}
+					else if (newGrid[x][y].value < 0) {
+						SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+						SDL_RenderDrawPoint(renderer, x, y);
+						livePred++;
+					} else {
+						empty++;
+					}
 				}
 			}
+			SDL_RenderPresent(renderer);
 		}
-		SDL_RenderPresent(renderer);
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+		if (info.rank == 0) {
+			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+		}
 	}
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -102,16 +119,16 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
 		UpdateSimulation();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (newGrid[x][y].value > 0) {
-					livePrey++;
-				}
-				else if (newGrid[x][y].value < 0) {
-					livePred++;
-				}
-				else {
-					empty++;
+		if (info.rank == 0) {
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					if (newGrid[x][y].value > 0) {
+						livePrey++;
+					} else if (newGrid[x][y].value < 0) {
+						livePred++;
+					} else {
+						empty++;
+					}
 				}
 			}
 		}

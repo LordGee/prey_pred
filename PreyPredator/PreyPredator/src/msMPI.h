@@ -5,8 +5,6 @@
 
 class MsMPI : public Simulator {
 public:
-	int contributionX, contributionY;
-
 	MsMPI(int width, int height, int preyPercent, int predPercent, int randomSeed, int threads, int proc)
 		: Simulator(width, height, preyPercent, predPercent, randomSeed, threads, proc) {}
 
