@@ -7,12 +7,12 @@
 Setup::Setup() {
 	// Set default values
 	PROJECT_TYPE = 1;
-	WIDTH = 1000;
+	WIDTH = 500;
 	HEIGHT = 500;
 	PREY_PERCENT = 50;
 	PRED_PERCENT = 25;
 	RANDOM_SEED = 1234;
-	DRAW_GRAPHICS = 0;
+	DRAW_GRAPHICS = 1;
 	ITERATIONS = 10000;
 	PROCESSORS = 1;
 	THREADS = 1;
@@ -32,7 +32,7 @@ Setup::Setup() {
 }
 
 void Setup::DisplaySelection() {
-	system("cls");
+	// system("cls");
 	std::cout << "WELCOME TO THE PREY VS PREDATOR SIMULATOR" << std::endl;
 	std::cout << "\tby Gordon Johnson (k1451760)" << std::endl;
 	std::cout << std::endl;
