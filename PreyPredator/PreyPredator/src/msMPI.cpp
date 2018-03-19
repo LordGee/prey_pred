@@ -256,20 +256,21 @@ void MsMPI::UpdateSimulation() {
 					if (processorCounter != info.noProcs - 1) {
 						processorCounter++;
 					}
-					if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
-						if (info.rank == processorCounter && info.rank != 0) {
+				}
+				//
+					if (info.rank == 0) {
+						MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
+						MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
+					}
+					
+						if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
 							newGrid[x][y] = copyGrid[x][y];
 							MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
 							MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
 						}
-						if (info.rank == 0) {
-							MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
-							MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
-						}
-					}
 					
-				}
-			} else {
+				//}
+			}  else {
 				if (info.rank == 0) {
 					newGrid[x][y] = copyGrid[x][y];
 				}
