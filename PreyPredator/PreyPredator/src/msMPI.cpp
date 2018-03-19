@@ -155,7 +155,7 @@ void MsMPI::UpdateSimulation() {
 			copyGrid[x][y].age = 0;		
 		}
 	}
-	int contributionY = GetProcessorValue(height);
+	const int contributionY = GetProcessorValue(height);
 	srand(time(NULL));
 	// loop through all cells and determin neighbour count
 	for (int x = 0; x < width; x++) {
@@ -248,32 +248,28 @@ void MsMPI::UpdateSimulation() {
 		}
 	}
 	// copy the COPY back to the main array
+	
 	int processorCounter = 1;
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			if (y > contributionY) {
-				if (y >= (contributionY * processorCounter) + contributionY) {
-					if (processorCounter != info.noProcs - 1) {
-						processorCounter++;
-					}
+			if (y >= (contributionY * processorCounter) + contributionY) {
+				if (processorCounter != info.noProcs - 1) {
+					processorCounter++;
 				}
-				//
-					if (info.rank == 0) {
-						MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
-						MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
-					}
-					
-						if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
-							newGrid[x][y] = copyGrid[x][y];
-							MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
-							MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
-						}
-					
-				//}
-			}  else {
+			}
+			if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
 				if (info.rank == 0) {
-					newGrid[x][y] = copyGrid[x][y];
+					MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
+					MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
 				}
+				if (info.rank == processorCounter) {
+					newGrid[x][y] = copyGrid[x][y];
+					MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
+					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
+				} 
+			} 
+			if (y < contributionY) {
+				newGrid[x][y] = copyGrid[x][y];
 			}
 		}
 		processorCounter = 1;

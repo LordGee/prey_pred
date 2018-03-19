@@ -2,8 +2,6 @@
 #include <cstdlib>
 
 App::App(InfoMPI &info) {
-
-	std::cout << "\n*** (App.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (info.rank == 0) {
 		setup = new Setup;
