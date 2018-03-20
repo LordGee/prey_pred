@@ -1,7 +1,7 @@
 #include "msMPI.h"
 #include <cstdlib>
 #include <ctime>
-
+#include <string>
 
 void MsMPI::PopulateGrid() {
 	srand(seed);
@@ -47,7 +47,9 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 	clock_t t1, t2;
 	float timer;
 	SDL_Event event;
-	SDL_Init(SDL_INIT_VIDEO);
+	if (info.rank == 0) {
+		SDL_Init(SDL_INIT_VIDEO);
+	}
 	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
@@ -57,7 +59,6 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 		livePrey = 0, livePred = 0, empty = 0;
 		deadPrey = 0, deadPred = 0;
 		UpdateSimulation();
-		MPI_Barrier(MPI_COMM_WORLD);
 		if (info.rank == 0) {
 			SDL_PollEvent(&event);
 			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
@@ -117,13 +118,17 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
 		if (info.rank == 0) {
-			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+			//UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+			std::cout << timer << std::endl;
+			fflush(stdout);
+			printf("%f", timer);
+			fflush(stdout);
 		}
 	}
 }
 
 void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
-	system("cls");
+	// system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
 	printf("\t by Gordon Johnson (k1451760)\n\n");
 	printf(" -------------------------------------------\n");
@@ -248,8 +253,39 @@ void MsMPI::UpdateSimulation() {
 		}
 	}
 	// copy the COPY back to the main array
-	
+
+	// std::cout << "\n*** (msMPI.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
+	MPI_Request request;
 	int processorCounter = 1;
+	if (info.rank == 0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (y <= contributionY) {
+					newGrid[x][y] = copyGrid[x][y];
+				} else {
+					if (y > (contributionY * processorCounter) + contributionY) {
+						if (processorCounter != info.noProcs - 1) {
+							processorCounter++;
+						}
+						if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
+							MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
+							MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
+						}
+					}
+				}
+			}
+		}
+	} else {
+		for (int x = 0; x < width; x++) {
+			for (int y = contributionY * info.rank; y < (contributionY * info.rank) + contributionY; y++) {
+				newGrid[x][y] = copyGrid[x][y];
+				MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
+				MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
+			}
+		}
+	}
+
+	/*/
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			if (y >= (contributionY * processorCounter) + contributionY) {
@@ -268,11 +304,14 @@ void MsMPI::UpdateSimulation() {
 					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
 				} 
 			} 
-			if (y < contributionY) {
+			if (y < contributionY && info.rank == 0) {
+				printf("\n%d", y);
+				fflush(stdout);
 				newGrid[x][y] = copyGrid[x][y];
 			}
 		}
 		processorCounter = 1;
 	}
+	*/
 }
 

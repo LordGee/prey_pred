@@ -54,7 +54,7 @@ App::App(InfoMPI &info) {
 		break;
 	case 2:
 		sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
-		sim->info.noProcs = setup->PROCESSORS;
+		sim->info.noProcs = info.noProcs;
 		sim->info.rank = info.rank;
 		break;
 	}
