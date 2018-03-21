@@ -53,7 +53,7 @@ App::App(InfoMPI &info) {
 		sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		break;
 	case 2:
-		sim = new MsMPI(setup->WIDTH + 2, setup->HEIGHT + 2, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
+		sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		sim->info.noProcs = info.noProcs;
 		sim->info.rank = info.rank;
 		break;

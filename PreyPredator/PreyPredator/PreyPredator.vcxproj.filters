@@ -354,5 +354,8 @@
     <ClCompile Include="src\FirstAttemptMPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SecondAttemptMPI_OK_Slow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
