@@ -282,6 +282,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\FirstAttemptMPI.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\msMPI.cpp" />
