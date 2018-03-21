@@ -19,16 +19,16 @@ void MsMPI::PopulateGrid() {
 					newGrid[x][y].age = 0;
 				}
 				if (y > width / 2) {
-					//MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 1, y, MPI_COMM_WORLD);
-					//MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 1, y * x + 1, MPI_COMM_WORLD);
+					MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 1, y, MPI_COMM_WORLD);
+					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 1, y * x + 1, MPI_COMM_WORLD);
 				}
 			}
 		}
 	} else if (info.rank == 1) {
-		for (int x = 0; x < width; x++) {
+		for (int x = 1; x < width; x++) {
 			for (int y = height / 2 + 1; y < height; y++) {
-				//MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
-				//MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD, &status);
+				MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
+				MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD, &status);
 			}
 		}
 	}
