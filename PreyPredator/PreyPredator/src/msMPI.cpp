@@ -5,8 +5,8 @@
 void MsMPI::PopulateGrid() {
 	srand(seed);
 	if (info.rank == 0) {
-		for (int x = 1; x < width; x++) {
-			for (int y = 1; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				float random = (float)(rand()) / (float)(RAND_MAX);
 				if (random < prey) {
 					newGrid[x][y].value = 1;
@@ -18,15 +18,15 @@ void MsMPI::PopulateGrid() {
 					newGrid[x][y].value = 0;
 					newGrid[x][y].age = 0;
 				}
-				if (y > width / 2) {
+				if (y >= height / 2) {
 					MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 1, y, MPI_COMM_WORLD);
 					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 1, y * x + 1, MPI_COMM_WORLD);
 				}
 			}
 		}
 	} else if (info.rank == 1) {
-		for (int x = 1; x < width; x++) {
-			for (int y = height / 2 + 1; y < height; y++) { // is it plus one?
+		for (int x = 0; x < width; x++) {
+			for (int y = height / 2; y < height; y++) { // is it plus one?
 				MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
 				MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD, &status);
 			}
@@ -157,43 +157,43 @@ void MsMPI::UpdateSimulation() {
 
 	// corner boundaries
 	if (info.rank == 0) {
-		newGrid[0][0] = newGrid[width - 1][height - 1];
-		newGrid[0][height] = newGrid[width - 1][1];
-		newGrid[width][height] = newGrid[1][1];
-		newGrid[width][0] = newGrid[1][height - 1];
-		MPI_Send(&newGrid[width][height].value, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
-		MPI_Send(&newGrid[width][height].age, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
-		MPI_Send(&newGrid[0][height].value, 1, MPI_INT, 1, 3, MPI_COMM_WORLD);
-		MPI_Send(&newGrid[0][height].age, 1, MPI_INT, 1, 4, MPI_COMM_WORLD);
+		newGrid[0][0] = newGrid[width - 2][height - 2];
+		newGrid[0][height - 1] = newGrid[width - 2][1];
+		newGrid[width - 1][height - 1] = newGrid[1][1];
+		newGrid[width - 1][0] = newGrid[1][height - 2];
+		MPI_Send(&newGrid[width - 1][height - 1].value, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[width - 1][height - 1].age, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[0][height - 1].value, 1, MPI_INT, 1, 3, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[0][height - 1].age, 1, MPI_INT, 1, 4, MPI_COMM_WORLD);
 	} else if (info.rank == 1) {
-		MPI_Recv(&newGrid[width][height].value , 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-		MPI_Recv(&newGrid[width][height].age, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
-		MPI_Recv(&newGrid[0][height].value, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
-		MPI_Recv(&newGrid[0][height].age, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[width - 1][height - 1].value , 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[width - 1][height - 1].age, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[0][height - 1].value, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[0][height - 1].age, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
 	}
 	// top-bottom boundaries
-	for (int x = 1; x < width; x++) {
+	for (int x = 1; x < width - 1; x++) {
 		if (info.rank == 0) {
-			newGrid[x][0] = newGrid[x][height - 1];
-			newGrid[x][height] = newGrid[x][1];
-			MPI_Send(&newGrid[x][height].value, 1, MPI_INT, 1, x + 5, MPI_COMM_WORLD);
-			MPI_Send(&newGrid[x][height].age, 1, MPI_INT, 1, x + width + 5, MPI_COMM_WORLD);
+			newGrid[x][0] = newGrid[x][height - 2];
+			newGrid[x][height - 1] = newGrid[x][1];
+			MPI_Send(&newGrid[x][height - 1].value, 1, MPI_INT, 1, x + 5, MPI_COMM_WORLD);
+			MPI_Send(&newGrid[x][height - 1].age, 1, MPI_INT, 1, x + width + 5, MPI_COMM_WORLD);
 		} else if (info.rank == 1) {
-			MPI_Recv(&newGrid[x][height].value, 1, MPI_INT, 0, x + 5, MPI_COMM_WORLD, &status);
-			MPI_Recv(&newGrid[x][height].age, 1, MPI_INT, 0, x + width + 5, MPI_COMM_WORLD, &status);
+			MPI_Recv(&newGrid[x][height - 1].value, 1, MPI_INT, 0, x + 5, MPI_COMM_WORLD, &status);
+			MPI_Recv(&newGrid[x][height - 1].age, 1, MPI_INT, 0, x + width + 5, MPI_COMM_WORLD, &status);
 		}
 	}
 	
 	// left-right boundaries
 	if (info.rank == 0) {
 		for (int y = 1; y < height / 2; y++) {
-			newGrid[0][y] = newGrid[width - 1][y];
-			newGrid[width][y] = newGrid[1][y];
+			newGrid[0][y] = newGrid[width - 2][y];
+			newGrid[width - 1][y] = newGrid[1][y];
 		}
 	} else if (info.rank == 1) {
 		for (int y = height / 2; y < height; y++) {
-			newGrid[0][y] = newGrid[width - 1][y];
-			newGrid[width][y] = newGrid[1][y];
+			newGrid[0][y] = newGrid[width - 2][y];
+			newGrid[width - 1][y] = newGrid[1][y];
 		}
 	}
 	
@@ -212,97 +212,168 @@ void MsMPI::UpdateSimulation() {
 
 	srand(time(NULL));
 	// loop through all cells and determin neighbour count
+	
 	if (info.rank == 0) {
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height / 2; y++) {
-
-			}
-		}
-	}
-	else if (info.rank == 1) {
-		for (int x = 0; x < width; x++) {
-			for (int y = height / 2 + 1; y < height; y++) {
-
-			}
-		}
-	}
-
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
-			for (int i = -1; i < 2; i++) {
-				for (int j = -1; j < 2; j++) {
-					if (!(i == 0 && j == 0)) {
-						int xTest = x + i, yTest = y + j;
-						if (yTest < 0) { yTest = yTest + height; }
-						if (xTest < 0) { xTest = xTest + width; }
-						if (yTest >= height) { yTest = yTest - height; }
-						if (xTest >= width) { xTest = xTest - width; }
-						if (newGrid[xTest][yTest].value > 0) {
-							preyCount++;
-							if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
-								preyAge++;
+		for (int x = 1; x < width - 1; x++) {
+			for (int y = 1; y < height / 2; y++) {
+				int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
+				for (int i = -1; i < 2; i++) {
+					for (int j = -1; j < 2; j++) {
+						if (!(i == 0 && j == 0)) {
+							if (newGrid[x + i][y + j].value > 0) {
+								preyCount++;
+								if (newGrid[x + i][y + j].age >= PREY_BREEDING) {
+									preyAge++;
+								}
 							}
-						} else if (newGrid[xTest][yTest].value < 0) {
-							predCount++;
-							if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
-								predAge++;
+							else if (newGrid[x + i][y + j].value < 0) {
+								predCount++;
+								if (newGrid[x + i][y + j].age >= PRED_BREEDING) {
+									predAge++;
+								}
 							}
 						}
 					}
 				}
-			}
-			// set current cell to new value depending on rules
-			if (newGrid[x][y].value > 0) {
-				//manage prey
-				if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
-					copyGrid[x][y].value = 0;
-					copyGrid[x][y].age = 0;
-					deadPrey++;
-				}
-				else {
-					copyGrid[x][y].value = newGrid[x][y].value;
-					copyGrid[x][y].age = newGrid[x][y].age + 1;
-				}
-			}
-			else if (newGrid[x][y].value < 0) {
-				// manage predator
-				float random = (float)(rand()) / (float)(RAND_MAX);
-				if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
-					if (random <= PRED_SUDDEN_DEATH) {
-						int z = 0;
+				// set current cell to new value depending on rules
+				if (newGrid[x][y].value > 0) {
+					//manage prey
+					if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+						deadPrey++;
 					}
-					copyGrid[x][y].value = 0;
-					copyGrid[x][y].age = 0;
-					deadPred++;
+					else {
+						copyGrid[x][y].value = newGrid[x][y].value;
+						copyGrid[x][y].age = newGrid[x][y].age + 1;
+					}
+				}
+				else if (newGrid[x][y].value < 0) {
+					// manage predator
+					float random = (float)(rand()) / (float)(RAND_MAX);
+					if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
+						if (random <= PRED_SUDDEN_DEATH) {
+							int z = 0;
+						}
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+						deadPred++;
+					}
+					else {
+						copyGrid[x][y].value = newGrid[x][y].value;
+						copyGrid[x][y].age = newGrid[x][y].age + 1;
+					}
 				}
 				else {
-					copyGrid[x][y].value = newGrid[x][y].value;
-					copyGrid[x][y].age = newGrid[x][y].age + 1;
-				}
-			}
-			else {
-				// manage empty space
-				if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
-					copyGrid[x][y].value = 1;
-					copyGrid[x][y].age = 1;
-				}
-				else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
-					copyGrid[x][y].value = -1;
-					copyGrid[x][y].age = 1;
-				}
-				else {
-					copyGrid[x][y].value = 0;
-					copyGrid[x][y].age = 0;
+					// manage empty space
+					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
+						copyGrid[x][y].value = 1;
+						copyGrid[x][y].age = 1;
+					}
+					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+						copyGrid[x][y].value = -1;
+						copyGrid[x][y].age = 1;
+					}
+					else {
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+					}
 				}
 			}
 		}
 	}
+	else if (info.rank == 1) {
+		for (int x = 1; x < width - 1; x++) {
+			for (int y = height / 2; y < height - 1; y++) {
+				int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
+				for (int i = -1; i < 2; i++) {
+					for (int j = -1; j < 2; j++) {
+						if (!(i == 0 && j == 0)) {
+							if (newGrid[x + i][y + j].value > 0) {
+								preyCount++;
+								if (newGrid[x + i][y + j].age >= PREY_BREEDING) {
+									preyAge++;
+								}
+							}
+							else if (newGrid[x + i][y + j].value < 0) {
+								predCount++;
+								if (newGrid[x + i][y + j].age >= PRED_BREEDING) {
+									predAge++;
+								}
+							}
+						}
+					}
+				}
+				// set current cell to new value depending on rules
+				if (newGrid[x][y].value > 0) {
+					//manage prey
+					if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+						deadPrey++;
+					}
+					else {
+						copyGrid[x][y].value = newGrid[x][y].value;
+						copyGrid[x][y].age = newGrid[x][y].age + 1;
+					}
+				}
+				else if (newGrid[x][y].value < 0) {
+					// manage predator
+					float random = (float)(rand()) / (float)(RAND_MAX);
+					if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
+						if (random <= PRED_SUDDEN_DEATH) {
+							int z = 0;
+						}
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+						deadPred++;
+					}
+					else {
+						copyGrid[x][y].value = newGrid[x][y].value;
+						copyGrid[x][y].age = newGrid[x][y].age + 1;
+					}
+				}
+				else {
+					// manage empty space
+					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
+						copyGrid[x][y].value = 1;
+						copyGrid[x][y].age = 1;
+					}
+					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+						copyGrid[x][y].value = -1;
+						copyGrid[x][y].age = 1;
+					}
+					else {
+						copyGrid[x][y].value = 0;
+						copyGrid[x][y].age = 0;
+					}
+				}
+			}
+		}
+	}
+
 	// copy the COPY back to the main array
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			newGrid[x][y] = copyGrid[x][y];
+	if (info.rank == 1) {
+		for (int x = 1; x < width - 1; x++) {
+			for (int y = height / 2; y < height - 1; y++) {
+				newGrid[x][y] = copyGrid[x][y];
+				MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
+				MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD);
+			}
 		}
 	}
+	if (info.rank == 0) {
+		for (int x = 1; x < width - 1; x++) {
+			for (int y = 1; y < height - 1; y++) {
+				if (y < height / 2) {
+					newGrid[x][y] = copyGrid[x][y];
+				} else {
+					MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 1, y, MPI_COMM_WORLD, &status);
+					MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 1, y * x + 1, MPI_COMM_WORLD, &status);
+				}
+			}
+		}
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
 }
 
