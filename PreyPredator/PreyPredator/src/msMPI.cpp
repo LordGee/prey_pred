@@ -26,7 +26,7 @@ void MsMPI::PopulateGrid() {
 		}
 	} else if (info.rank == 1) {
 		for (int x = 1; x < width; x++) {
-			for (int y = height / 2 + 1; y < height; y++) {
+			for (int y = height / 2 + 1; y < height; y++) { // is it plus one?
 				MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
 				MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD, &status);
 			}
@@ -155,8 +155,78 @@ void MsMPI::UpdateSimulation() {
 		}
 	}
 
+	// corner boundaries
+	if (info.rank == 0) {
+		newGrid[0][0] = newGrid[width - 1][height - 1];
+		newGrid[0][height] = newGrid[width - 1][1];
+		newGrid[width][height] = newGrid[1][1];
+		newGrid[width][0] = newGrid[1][height - 1];
+		MPI_Send(&newGrid[width][height].value, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[width][height].age, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[0][height].value, 1, MPI_INT, 1, 3, MPI_COMM_WORLD);
+		MPI_Send(&newGrid[0][height].age, 1, MPI_INT, 1, 4, MPI_COMM_WORLD);
+	} else if (info.rank == 1) {
+		MPI_Recv(&newGrid[width][height].value , 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[width][height].age, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[0][height].value, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
+		MPI_Recv(&newGrid[0][height].age, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
+	}
+	// top-bottom boundaries
+	for (int x = 1; x < width; x++) {
+		if (info.rank == 0) {
+			newGrid[x][0] = newGrid[x][height - 1];
+			newGrid[x][height] = newGrid[x][1];
+			MPI_Send(&newGrid[x][height].value, 1, MPI_INT, 1, x + 5, MPI_COMM_WORLD);
+			MPI_Send(&newGrid[x][height].age, 1, MPI_INT, 1, x + width + 5, MPI_COMM_WORLD);
+		} else if (info.rank == 1) {
+			MPI_Recv(&newGrid[x][height].value, 1, MPI_INT, 0, x + 5, MPI_COMM_WORLD, &status);
+			MPI_Recv(&newGrid[x][height].age, 1, MPI_INT, 0, x + width + 5, MPI_COMM_WORLD, &status);
+		}
+	}
+	
+	// left-right boundaries
+	if (info.rank == 0) {
+		for (int y = 1; y < height / 2; y++) {
+			newGrid[0][y] = newGrid[width - 1][y];
+			newGrid[width][y] = newGrid[1][y];
+		}
+	} else if (info.rank == 1) {
+		for (int y = height / 2; y < height; y++) {
+			newGrid[0][y] = newGrid[width - 1][y];
+			newGrid[width][y] = newGrid[1][y];
+		}
+	}
+	
+	// get the middle split
+	if (info.rank == 0) {
+		for (int x = 0; x < width; x++) {
+			MPI_Send(&newGrid[x][height / 2 - 1].value, 1, MPI_INT, 1, x, MPI_COMM_WORLD);
+			MPI_Send(&newGrid[x][height / 2 - 1].age, 1, MPI_INT, 1, x * 2, MPI_COMM_WORLD);
+		}
+	} else if (info.rank == 1) {
+		for (int x = 0; x < width; x++) {
+			MPI_Recv(&newGrid[x][height / 2 - 1].value, 1, MPI_INT, 0, x, MPI_COMM_WORLD, &status);
+			MPI_Recv(&newGrid[x][height / 2 - 1].age, 1, MPI_INT, 0, x * 2, MPI_COMM_WORLD, &status);
+		}
+	}
+
 	srand(time(NULL));
 	// loop through all cells and determin neighbour count
+	if (info.rank == 0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height / 2; y++) {
+
+			}
+		}
+	}
+	else if (info.rank == 1) {
+		for (int x = 0; x < width; x++) {
+			for (int y = height / 2 + 1; y < height; y++) {
+
+			}
+		}
+	}
+
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
@@ -173,8 +243,7 @@ void MsMPI::UpdateSimulation() {
 							if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
 								preyAge++;
 							}
-						}
-						else if (newGrid[xTest][yTest].value < 0) {
+						} else if (newGrid[xTest][yTest].value < 0) {
 							predCount++;
 							if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
 								predAge++;
