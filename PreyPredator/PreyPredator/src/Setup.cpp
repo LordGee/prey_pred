@@ -7,8 +7,8 @@
 Setup::Setup() {
 	// Set default values
 	PROJECT_TYPE = 1;
-	WIDTH = 12;
-	HEIGHT = 12;
+	WIDTH = 800;
+	HEIGHT = 800;
 	PREY_PERCENT = 50;
 	PRED_PERCENT = 25;
 	RANDOM_SEED = 1234;
@@ -24,9 +24,9 @@ Setup::Setup() {
 	m_ProjectType.push_back("Hybrid");
 
 	/* File location depending on execution method (Comment out unused) */
-	// exefilename = "PreyPredator.exe"; // production mode
+	exefilename = "PreyPredator.exe"; // production mode
 	// exefilename = "../bin/release/PreyPredator.exe"; // release mode run through VS
-	exefilename = "../bin/debug/PreyPredator.exe"; // debug mode run through VS
+	// exefilename = "../bin/debug/PreyPredator.exe"; // debug mode run through VS
 
 	//exefilename = "../bin/debug/run.bat"; // debug mode run through VS
 }

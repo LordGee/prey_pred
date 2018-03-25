@@ -24,10 +24,7 @@ void MsMPI::PopulateGrid() {
 					newGrid[x][y].age = 0;
 				}
 			}
-			if (y == contributionY * processorCounter + contributionY) {
-				int z = 0;
-			}
-			if (y >= (contributionY * processorCounter) + contributionY - 1) {
+			if (y >= (contributionY * processorCounter) + contributionY) {
 				if (processorCounter != info.noProcs - 1) {
 					processorCounter++;
 				}
@@ -127,11 +124,7 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
 		if (info.rank == 0) {
-			//UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
-			std::cout << timer << std::endl;
-			fflush(stdout);
-			printf("%f", timer);
-			fflush(stdout);
+			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 		}
 	}
 }
@@ -171,160 +164,118 @@ void MsMPI::UpdateSimulation() {
 	}
 	const int contributionY = abs(height / info.noProcs);
 	srand(time(NULL));
+	
+	MPI_Request request;
+	// prepare top and bottom bounderies
+	if (info.rank == 0 || info.rank == info.noProcs - 1) {
+		for (int x = 0; x < width; x++) {
+			if (info.rank == 0) {
+				MPI_Isend(&newGrid[x][0].value, 1, MPI_INT, info.noProcs - 1, x, MPI_COMM_WORLD, &request);
+				MPI_Irecv(&newGrid[x][height - 1].value, 1, MPI_INT, info.noProcs - 1, x + 1 + width, MPI_COMM_WORLD, &request);
+			} else if (info.rank == info.noProcs - 1) {
+				MPI_Irecv(&newGrid[x][0].value, 1, MPI_INT, 0, x, MPI_COMM_WORLD, &request);
+				MPI_Isend(&newGrid[x][height - 1].value, 1, MPI_INT, 0, x + 1 + width, MPI_COMM_WORLD, &request);
+			}
+		}
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
 	// loop through all cells and determin neighbour count
 	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
+		for (int y = contributionY * info.rank; y < contributionY * info.rank + contributionY; y++) {
 			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
-			if (info.rank == 0) {
-				for (int i = -1; i < 2; i++) {
-					for (int j = -1; j < 2; j++) {
-						if (!(i == 0 && j == 0)) {
-							int xTest = x + i, yTest = y + j;
-							if (yTest < 0) { yTest = yTest + height; }
-							if (xTest < 0) { xTest = xTest + width; }
-							if (yTest >= height) { yTest = yTest - height; }
-							if (xTest >= width) { xTest = xTest - width; }
-							if (newGrid[xTest][yTest].value > 0) {
-								preyCount++;
-								if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
-									preyAge++;
-								}
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+					if (!(i == 0 && j == 0)) {
+						int xTest = x + i, yTest = y + j;
+						if (yTest < 0) { yTest = yTest + height; }
+						if (xTest < 0) { xTest = xTest + width; }
+						if (yTest >= height) { yTest = yTest - height; }
+						if (xTest >= width) { xTest = xTest - width; }
+						if (newGrid[xTest][yTest].value > 0) {
+							preyCount++;
+							if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
+								preyAge++;
 							}
-							else if (newGrid[xTest][yTest].value < 0) {
-								predCount++;
-								if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
-									predAge++;
-								}
+						} else if (newGrid[xTest][yTest].value < 0) {
+							predCount++;
+							if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
+								predAge++;
 							}
 						}
 					}
 				}
-				for (int i = 1; i < info.noProcs; i++) {
-					MPI_Send(&preyCount, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-					MPI_Send(&preyAge, 1, MPI_INT, i, 2, MPI_COMM_WORLD);
-					MPI_Send(&predCount, 1, MPI_INT, i, 3, MPI_COMM_WORLD);
-					MPI_Send(&predAge, 1, MPI_INT, i, 4, MPI_COMM_WORLD);
-				}
 			}
-			else {
-				MPI_Recv(&preyCount, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-				MPI_Recv(&preyAge, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
-				MPI_Recv(&predCount, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
-				MPI_Recv(&predAge, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
-			}
-
-			// set current cell to new value depending on rules
-
-			if (y > contributionY * info.rank && y < (contributionY * info.rank) + contributionY) {
-				if (newGrid[x][y].value > 0) {
-					//manage prey
-					if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
-						copyGrid[x][y].value = 0;
-						copyGrid[x][y].age = 0;
-						deadPrey++;
-					}
-					else {
-						copyGrid[x][y].value = newGrid[x][y].value;
-						copyGrid[x][y].age = newGrid[x][y].age + 1;
-					}
+			if (newGrid[x][y].value > 0) {
+				//manage prey
+				if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+					deadPrey++;
+				} else {
+					copyGrid[x][y].value = newGrid[x][y].value;
+					copyGrid[x][y].age = newGrid[x][y].age + 1;
 				}
-				else if (newGrid[x][y].value < 0) {
-					// manage predator
-					float random = (float)(rand()) / (float)(RAND_MAX);
-					if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
-						if (random <= PRED_SUDDEN_DEATH) {
-							int z = 0;
-						}
-						copyGrid[x][y].value = 0;
-						copyGrid[x][y].age = 0;
-						deadPred++;
+			} else if (newGrid[x][y].value < 0) {
+				// manage predator
+				float random = (float)(rand()) / (float)(RAND_MAX);
+				if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
+					if (random <= PRED_SUDDEN_DEATH) {
+						int z = 0;
 					}
-					else {
-						copyGrid[x][y].value = newGrid[x][y].value;
-						copyGrid[x][y].age = newGrid[x][y].age + 1;
-					}
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
+					deadPred++;
+				} else {
+					copyGrid[x][y].value = newGrid[x][y].value;
+					copyGrid[x][y].age = newGrid[x][y].age + 1;
 				}
-				else {
-					// manage empty space
-					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
-						copyGrid[x][y].value = 1;
-						copyGrid[x][y].age = 1;
-					}
-					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
-						copyGrid[x][y].value = -1;
-						copyGrid[x][y].age = 1;
-					}
-					else {
-						copyGrid[x][y].value = 0;
-						copyGrid[x][y].age = 0;
-					}
+			} else {
+				// manage empty space
+				if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
+					copyGrid[x][y].value = 1;
+					copyGrid[x][y].age = 1;
+				} else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+					copyGrid[x][y].value = -1;
+					copyGrid[x][y].age = 1;
+				} else {
+					copyGrid[x][y].value = 0;
+					copyGrid[x][y].age = 0;
 				}
 			}
 		}
 	}
-	// copy the COPY back to the main array
 
-	// std::cout << "\n*** (msMPI.cpp) Rank " << info.rank << " out of " << info.noProcs << " ***\n" << std::endl;
-	MPI_Request request;
-	int processorCounter = 1;
+	// copy the COPY back to the main array
+	if (info.rank > 0) {
+		for (int x = 0; x < width; x++) {
+			for (int y = contributionY * info.rank; y < contributionY * (info.rank + 1); y++) {
+				newGrid[x][y] = copyGrid[x][y];
+				MPI_Ssend(&newGrid[x][y].value, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD);
+				MPI_Ssend(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1 * y + 1, MPI_COMM_WORLD);
+			}
+		}
+	}
 	if (info.rank == 0) {
 		for (int x = 0; x < width; x++) {
+			int processorCounter = 1;
 			for (int y = 0; y < height; y++) {
-				if (y <= contributionY) {
+				if (y < contributionY) {
 					newGrid[x][y] = copyGrid[x][y];
-				}
-				else {
-					if (y >(contributionY * processorCounter) + contributionY) {
+				} else {	
+					if (y >= contributionY * (processorCounter + 1)) {
 						if (processorCounter != info.noProcs - 1) {
 							processorCounter++;
 						}
-						if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
-							MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
-							MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
-						}
+					}
+					if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
+						MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y * x + 1, MPI_COMM_WORLD, &status);
+						MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * x + 1 * y + 1, MPI_COMM_WORLD, &status);
 					}
 				}
 			}
 		}
 	}
-	else {
-		for (int x = 0; x < width; x++) {
-			for (int y = contributionY * info.rank; y < (contributionY * info.rank) + contributionY; y++) {
-				newGrid[x][y] = copyGrid[x][y];
-				MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
-				MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
-				// issue above y=2, x=8
-			}
-		}
-	}
-
-
-	//for (int x = 0; x < width; x++) {
-	//for (int y = 0; y < height; y++) {
-	//if (y >= (contributionY * processorCounter) + contributionY) {
-	//if (processorCounter != info.noProcs - 1) {
-	//processorCounter++;
-	//}
-	//}
-	//if (y > contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
-	//if (info.rank == 0) {
-	//MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
-	//MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD, &status);
-	//}
-	//if (info.rank == processorCounter) {
-	//newGrid[x][y] = copyGrid[x][y];
-	//MPI_Send(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD);
-	//MPI_Send(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD);
-	//}
-	//}
-	//if (y < contributionY && info.rank == 0) {
-	//printf("\n%d", y);
-	//fflush(stdout);
-	//newGrid[x][y] = copyGrid[x][y];
-	//}
-	//}
-	//processorCounter = 1;
-	//}
-
+	MPI_Barrier(MPI_COMM_WORLD);
+	
 }
 
