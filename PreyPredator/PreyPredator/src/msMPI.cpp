@@ -24,12 +24,12 @@ void MsMPI::PopulateGrid() {
 					newGrid[x][y].age = 0;
 				}
 			}
-			if (y >= (contributionY * processorCounter) + contributionY) {
+			if (y >= contributionY * (processorCounter + 1)) {
 				if (processorCounter != info.noProcs - 1) {
 					processorCounter++;
 				}
 			}
-			if (y >= contributionY * processorCounter && y < (contributionY * processorCounter) + contributionY) {
+			if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
 				if (info.rank == 0) {
 					MPI_Send(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
 					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD);
@@ -50,13 +50,14 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 	clock_t t1, t2;
 	float timer;
 	SDL_Event event;
+	SDL_Window* window = NULL;
+	SDL_Renderer* renderer = NULL;
 	if (info.rank == 0) {
 		SDL_Init(SDL_INIT_VIDEO);
+		window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+		renderer = SDL_CreateRenderer(window, -1, 0);
 	}
-	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-
 	while (counter < COUNT) {
 		t1 = clock();
 		livePrey = 0, livePred = 0, empty = 0;
@@ -72,13 +73,11 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 						SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 						SDL_RenderDrawPoint(renderer, x, y);
 						livePrey++;
-					}
-					else if (newGrid[x][y].value < 0) {
+					} else if (newGrid[x][y].value < 0) {
 						SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 						SDL_RenderDrawPoint(renderer, x, y);
 						livePred++;
-					}
-					else {
+					} else {
 						empty++;
 					}
 				}
@@ -110,11 +109,9 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 				for (int y = 0; y < height; y++) {
 					if (newGrid[x][y].value > 0) {
 						livePrey++;
-					}
-					else if (newGrid[x][y].value < 0) {
+					} else if (newGrid[x][y].value < 0) {
 						livePred++;
-					}
-					else {
+					} else {
 						empty++;
 					}
 				}
@@ -165,23 +162,39 @@ void MsMPI::UpdateSimulation() {
 	const int contributionY = abs(height / info.noProcs);
 	srand(time(NULL));
 	
-	MPI_Request request;
 	// prepare top and bottom bounderies
-	if (info.rank == 0 || info.rank == info.noProcs - 1) {
-		for (int x = 0; x < width; x++) {
-			if (info.rank == 0) {
-				MPI_Isend(&newGrid[x][0].value, 1, MPI_INT, info.noProcs - 1, x, MPI_COMM_WORLD, &request);
-				MPI_Irecv(&newGrid[x][height - 1].value, 1, MPI_INT, info.noProcs - 1, x + 1 + width, MPI_COMM_WORLD, &request);
-			} else if (info.rank == info.noProcs - 1) {
-				MPI_Irecv(&newGrid[x][0].value, 1, MPI_INT, 0, x, MPI_COMM_WORLD, &request);
-				MPI_Isend(&newGrid[x][height - 1].value, 1, MPI_INT, 0, x + 1 + width, MPI_COMM_WORLD, &request);
-			}
+	for (int x = 0; x < width; x++) {
+		if (info.rank == 0) {
+			MPI_Send(&newGrid[x][0].value, 1, MPI_INT, info.noProcs - 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][height - 1].value, 1, MPI_INT, info.noProcs - 1, x + width, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][0].age, 1, MPI_INT, info.noProcs - 1, x * width, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][height - 1].age, 1, MPI_INT, info.noProcs - 1, x + width * width, MPI_COMM_WORLD, &status);
 		}
+		else if (info.rank == info.noProcs - 1) {
+			MPI_Recv(&newGrid[x][0].value, 1, MPI_INT, 0, x, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][height - 1].value, 1, MPI_INT, 0, x + width, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][0].age, 1, MPI_INT, 0, x * width, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][height - 1].age, 1, MPI_INT, 0, x + width * width, MPI_COMM_WORLD);
+		}
+		if (info.rank != info.noProcs - 1) {
+			MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1].value, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))].value, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
+		}
+		if (info.rank != 0) {
+			MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1].value, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][contributionY * info.rank].value, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][contributionY * info.rank].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
+		}
+		
 	}
+	
 	MPI_Barrier(MPI_COMM_WORLD);
 	// loop through all cells and determin neighbour count
 	for (int x = 0; x < width; x++) {
-		for (int y = contributionY * info.rank; y < contributionY * info.rank + contributionY; y++) {
+		for (int y = contributionY * info.rank; y < contributionY * (info.rank + 1); y++) {
 			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
 			for (int i = -1; i < 2; i++) {
 				for (int j = -1; j < 2; j++) {
@@ -276,6 +289,8 @@ void MsMPI::UpdateSimulation() {
 		}
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
+
+
 	
 }
 

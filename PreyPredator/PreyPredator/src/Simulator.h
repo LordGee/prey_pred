@@ -39,6 +39,7 @@ public:
 	const float PRED_SUDDEN_DEATH = 0.031f;
 
 	MPI_Status status;
+	MPI_Request request;
 	InfoMPI info;
 
 public:
