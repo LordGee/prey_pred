@@ -31,18 +31,20 @@ void MsMPI::PopulateGrid() {
 			}
 			if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
 				if (info.rank == 0) {
-					MPI_Send(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
-					MPI_Send(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD);
+					MPI_Send(&newGrid[x][y], 2, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
+					//MPI_Send(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD);
 				}
 				if (info.rank == processorCounter) {
-					MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
-					MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD, &status);
+					MPI_Recv(&newGrid[x][y], 2, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
+					//MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD, &status);
 				}
 			}
 		}
 		processorCounter = 1;
 	}
 	
+	
+
 }
 
 void MsMPI::DrawSimToScreen(const int COUNT) {
@@ -165,28 +167,28 @@ void MsMPI::UpdateSimulation() {
 	// prepare top and bottom bounderies
 	for (int x = 0; x < width; x++) {
 		if (info.rank == 0) {
-			MPI_Send(&newGrid[x][0].value, 1, MPI_INT, info.noProcs - 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][height - 1].value, 1, MPI_INT, info.noProcs - 1, x + width, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][0].age, 1, MPI_INT, info.noProcs - 1, x * width, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][height - 1].age, 1, MPI_INT, info.noProcs - 1, x + width * width, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][0], 2, MPI_INT, info.noProcs - 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][height - 1], 2, MPI_INT, info.noProcs - 1, x + width, MPI_COMM_WORLD, &status);
+			//MPI_Send(&newGrid[x][0].age, 1, MPI_INT, info.noProcs - 1, x * width, MPI_COMM_WORLD);
+			//MPI_Recv(&newGrid[x][height - 1].age, 1, MPI_INT, info.noProcs - 1, x + width * width, MPI_COMM_WORLD, &status);
 		}
 		else if (info.rank == info.noProcs - 1) {
-			MPI_Recv(&newGrid[x][0].value, 1, MPI_INT, 0, x, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][height - 1].value, 1, MPI_INT, 0, x + width, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][0].age, 1, MPI_INT, 0, x * width, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][height - 1].age, 1, MPI_INT, 0, x + width * width, MPI_COMM_WORLD);
+			MPI_Send(&newGrid[x][height - 1], 2, MPI_INT, 0, x + width, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][0], 2, MPI_INT, 0, x, MPI_COMM_WORLD, &status);
+			//MPI_Send(&newGrid[x][height - 1].age, 1, MPI_INT, 0, x + width * width, MPI_COMM_WORLD);
+			//MPI_Recv(&newGrid[x][0].age, 1, MPI_INT, 0, x * width, MPI_COMM_WORLD, &status);
 		}
 		if (info.rank != info.noProcs - 1) {
-			MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1].value, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))].value, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
+			MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1], 2, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))], 2, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
+			//MPI_Send(&newGrid[x][(contributionY * (info.rank + 1)) - 1].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
+			//MPI_Recv(&newGrid[x][(contributionY * (info.rank + 1))].age, 1, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
 		}
 		if (info.rank != 0) {
-			MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1].value, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][contributionY * info.rank].value, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
-			MPI_Send(&newGrid[x][contributionY * info.rank].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
+			MPI_Send(&newGrid[x][contributionY * info.rank], 2, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1], 2, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
+			//MPI_Send(&newGrid[x][contributionY * info.rank].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
+			//MPI_Recv(&newGrid[x][(contributionY * info.rank) - 1].age, 1, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
 		}
 		
 	}
@@ -257,40 +259,31 @@ void MsMPI::UpdateSimulation() {
 			}
 		}
 	}
-
 	// copy the COPY back to the main array
-	if (info.rank > 0) {
-		for (int x = 0; x < width; x++) {
-			for (int y = contributionY * info.rank; y < contributionY * (info.rank + 1); y++) {
-				newGrid[x][y] = copyGrid[x][y];
-				MPI_Ssend(&newGrid[x][y].value, 1, MPI_INT, 0, y * x + 1, MPI_COMM_WORLD);
-				MPI_Ssend(&newGrid[x][y].age, 1, MPI_INT, 0, y * x + 1 * y + 1, MPI_COMM_WORLD);
-			}
+
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			newGrid[x][y] = copyGrid[x][y];
 		}
 	}
-	if (info.rank == 0) {
-		for (int x = 0; x < width; x++) {
-			int processorCounter = 1;
-			for (int y = 0; y < height; y++) {
-				if (y < contributionY) {
-					newGrid[x][y] = copyGrid[x][y];
-				} else {	
-					if (y >= contributionY * (processorCounter + 1)) {
-						if (processorCounter != info.noProcs - 1) {
-							processorCounter++;
-						}
-					}
-					if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
-						MPI_Recv(&newGrid[x][y].value, 1, MPI_INT, processorCounter, y * x + 1, MPI_COMM_WORLD, &status);
-						MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * x + 1 * y + 1, MPI_COMM_WORLD, &status);
-					}
+
+
+	for (int x = 0; x < width; x++) {
+		int processorCounter = 1;
+		for (int y = contributionY; y < height; y++) {
+			if (y >= contributionY * (processorCounter + 1)) {
+				if (processorCounter != info.noProcs - 1) {
+					processorCounter++;
+				}
+			}
+			if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
+				if (info.rank == 0) {
+					MPI_Recv(&newGrid[x][y], 2, MPI_INT, processorCounter, y, MPI_COMM_WORLD, &status);
+				} else if (info.rank == processorCounter) {
+					MPI_Ssend(&newGrid[x][y], 2, MPI_INT, 0, y, MPI_COMM_WORLD);		
 				}
 			}
 		}
 	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
-
-	
 }
 
