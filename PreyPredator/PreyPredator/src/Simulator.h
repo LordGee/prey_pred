@@ -25,6 +25,9 @@ public:
 	
 	int width, height, seed, numThreads, numProc;
 	float prey, pred;
+	bool noDraw;
+
+	std::vector<float> timerLog;
 
 	const int PREY_BREEDING = 2;
 	const int PRED_BREEDING = 3;
@@ -47,6 +50,7 @@ public:
 	virtual void PopulateGrid() = 0;
 	virtual void DrawSimToScreen(const int COUNT) = 0;
 	virtual void RunSimNoDraw(const int COUNT) = 0;
+	virtual void RunNoDisplay(const int COUNT) = 0;
 	virtual void UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) = 0;
 	virtual void UpdateSimulation() = 0;
 };

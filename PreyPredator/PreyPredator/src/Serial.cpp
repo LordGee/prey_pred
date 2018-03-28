@@ -91,6 +91,10 @@ void Serial::RunSimNoDraw(const int COUNT) {
 	}
 }
 
+void Serial::RunNoDisplay(const int COUNT) {
+	
+}
+
 void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
 	system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");

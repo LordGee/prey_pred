@@ -102,6 +102,10 @@ void OpenMP::RunSimNoDraw(const int COUNT) {
 	}
 }
 
+void OpenMP::RunNoDisplay(const int COUNT) {
+	
+}
+
 void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
 	system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");

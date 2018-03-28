@@ -53,6 +53,9 @@ App::App(InfoMPI &info) {
 		sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		break;
 	case 2:
+		if (setup->HEIGHT % info.noProcs != 0) {
+			setup->HEIGHT = abs(setup->HEIGHT / info.noProcs) * info.noProcs;
+		}
 		sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		sim->info.noProcs = info.noProcs;
 		sim->info.rank = info.rank;
@@ -65,8 +68,10 @@ App::App(InfoMPI &info) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (setup->DRAW_GRAPHICS == 1) {
 		sim->DrawSimToScreen(setup->ITERATIONS);
-	} else {
+	} else if (setup->DRAW_GRAPHICS == 2) {
 		sim->RunSimNoDraw(setup->ITERATIONS);
+	} else {
+		sim->RunNoDisplay(setup->ITERATIONS);
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 }

@@ -48,6 +48,7 @@ void MsMPI::PopulateGrid() {
 }
 
 void MsMPI::DrawSimToScreen(const int COUNT) {
+	noDraw = false;
 	int counter = 0;
 	clock_t t1, t2;
 	float timer;
@@ -98,6 +99,7 @@ void MsMPI::DrawSimToScreen(const int COUNT) {
 }
 
 void MsMPI::RunSimNoDraw(const int COUNT) {
+	noDraw = false;
 	int counter = 0;
 	clock_t t1, t2;
 	float timer;
@@ -126,6 +128,51 @@ void MsMPI::RunSimNoDraw(const int COUNT) {
 			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 		}
 	}
+}
+
+void MsMPI::RunNoDisplay(const int COUNT) {
+	noDraw = true;
+	int counter = 0;
+	clock_t t1, t2;
+	float timer;
+	while (counter < COUNT) {
+		t1 = clock();
+		/*deadPrey = 0, deadPred = 0;
+		livePrey = 0, livePred = 0, empty = 0;*/
+		UpdateSimulation();
+		/*if (info.rank == 0) {
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					if (newGrid[x][y].value > 0) {
+						livePrey++;
+					}
+					else if (newGrid[x][y].value < 0) {
+						livePred++;
+					}
+					else {
+						empty++;
+					}
+				}
+			}
+		}*/
+		counter++;
+		t2 = clock();
+		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
+		if (info.rank == 0) {
+			timerLog.push_back(timer);
+			//UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
+		}
+	}
+	if (info.rank == 0) {
+		float average = 0.0f;
+		for (int i = 0; i < timerLog.size(); i++) {
+			average += timerLog[i];
+		}
+		average = average / timerLog.size();
+		std::cout << "Average time for each iteration - " << average << std::endl;
+		fflush(stdout);
+	}
+	
 }
 
 void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
@@ -259,41 +306,21 @@ void MsMPI::UpdateSimulation() {
 		}
 	}
 
-	int processorCounter = info.noProcs - 1;
-	MPI_Barrier(MPI_COMM_WORLD);
-	while (processorCounter != 0) {
-		for (int x = 0; x < width; x++) {
-			for (int y = contributionY * processorCounter; y < width; y++) {
-				if (info.rank == processorCounter) {
-					MPI_Rsend(&newGrid[x][y], 2, MPI_INT, processorCounter - 1, y * (x + processorCounter), MPI_COMM_WORLD);
-				}
-				if (info.rank == processorCounter - 1) {
-					MPI_Recv(&newGrid[x][y], 2, MPI_INT, processorCounter, y * (x + processorCounter), MPI_COMM_WORLD, &status);
-				}
-			}
-		}
-		processorCounter--;
-	}
-
-	/*
-	for (int x = 0; x < width; x++) {
-		int processorCounter = 1;
-		for (int y = contributionY; y < height; y++) {
-			if (y >= contributionY * (processorCounter + 1)) {
-				if (processorCounter != info.noProcs - 1) {
-					processorCounter++;
+	if (!noDraw) {
+		int processorCounter = info.noProcs - 1;
+		while (processorCounter != 0) {
+			for (int x = 0; x < width; x++) {
+				for (int y = contributionY * processorCounter; y < height; y++) {
+					if (info.rank == processorCounter) {
+						MPI_Rsend(&newGrid[x][y], 2, MPI_INT, processorCounter - 1, y * (x + processorCounter), MPI_COMM_WORLD);
+					}
+					if (info.rank == processorCounter - 1) {
+						MPI_Recv(&newGrid[x][y], 2, MPI_INT, processorCounter, y * (x + processorCounter), MPI_COMM_WORLD, &status);
+					}
 				}
 			}
-			if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
-				if (info.rank == processorCounter) {
-					MPI_Ssend(&newGrid[x][y], 2, MPI_INT, 0, y * (x + processorCounter), MPI_COMM_WORLD);
-				}
-				if (info.rank == 0) {
-					MPI_Recv(&newGrid[x][y], 2, MPI_INT, processorCounter, y * (x + processorCounter), MPI_COMM_WORLD, &status);
-				}
-			}
+			processorCounter--;
 		}
 	}
-	*/
 }
 

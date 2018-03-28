@@ -12,8 +12,8 @@ Setup::Setup() {
 	PREY_PERCENT = 50;
 	PRED_PERCENT = 25;
 	RANDOM_SEED = 1234;
-	DRAW_GRAPHICS = 0;
-	ITERATIONS = 100000;
+	DRAW_GRAPHICS = 3;
+	ITERATIONS = 100;
 	PROCESSORS = 1;
 	THREADS = 1;
 
@@ -48,7 +48,7 @@ void Setup::DisplaySelection() {
 	std::cout << "| 4.\t | Prey Percentage:\t\t| " << PREY_PERCENT << std::endl;
 	std::cout << "| 5.\t | Predator Percentage:\t\t| " << PRED_PERCENT << std::endl;
 	std::cout << "| 6.\t | Random Seed:\t\t\t| " << RANDOM_SEED << std::endl;
-	std::cout << "| 7.\t | Graphics Mode:\t\t| " << ((DRAW_GRAPHICS == 1) ? "YES" : "NO") << std::endl;
+	std::cout << "| 7.\t | Graphics Mode:\t\t| " << ((DRAW_GRAPHICS == 1) ? "Graphics" : (DRAW_GRAPHICS == 2) ? "ASCI" : "No Display") << std::endl;
 	std::cout << "| 8.\t | Number of Iterations:\t| " << ITERATIONS << std::endl;
 	std::cout << "| 9.\t | Number of Threads:\t\t| " << THREADS << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
@@ -121,9 +121,9 @@ void Setup::EditOptions(int value) {
 		DisplaySelection();
 		break;
 	case 7:
-		tempValue = QuestionAnswer("Would you like the graphics of the simulation to be drawn to the screen? \n\t( 1 = YES / 0 = NO )");
-		while (tempValue < 0 || tempValue > 1) {
-			tempValue = QuestionAnswer("Choose option 1 or 0 ...");
+		tempValue = QuestionAnswer("Would you like the graphics of the simulation to be drawn to the screen? \n\t1 = Full Graphics plus Stats \n\t2 = ASCI only Stats \n\t3 = No Display Output");
+		while (tempValue < 1 || tempValue > 3) {
+			tempValue = QuestionAnswer("Choose option 1, 2 or 3 ...");
 		}
 		DRAW_GRAPHICS = tempValue;
 		DisplaySelection();
@@ -139,8 +139,8 @@ void Setup::EditOptions(int value) {
 	case 9:
 		tempValue = QuestionAnswer("How many threads would you like to use for this simulation?");
 		IncorrectValueEntry(tempValue, std::cin.fail());
-		while (tempValue < 1 || tempValue > 32) {
-			tempValue = QuestionAnswer("Choose a sensible thread value between 1 and 32...");
+		while (tempValue < 2 || tempValue > 32) {
+			tempValue = QuestionAnswer("Choose a sensible thread value between 2 and 32...");
 		}
 		THREADS = tempValue;
 		DisplaySelection();
@@ -170,8 +170,8 @@ void Setup::SelectProjectType() {
 			std::cout << "WARNING: This will restart application and reset all previously configured settings back to default." << std::endl;
 			int procValue = QuestionAnswer("How many processes would you like to use for this simulation?");
 			IncorrectValueEntry(procValue, std::cin.fail());
-			while (procValue < 1 || procValue > 32) {
-				procValue = QuestionAnswer("Choose a sensible processor value between 1 and 32...");
+			while (procValue < 2 || procValue > 32) {
+				procValue = QuestionAnswer("Choose a sensible processor value between 2 and 32...");
 			}
 			PROCESSORS = procValue;
 
