@@ -151,7 +151,7 @@ void Hybrid::RunNoDisplay(const int COUNT) {
 	}
 	if (info.rank == 0) {
 		float average = 0.0f;
-		for (int i = 0; i < timerLog.size(); i++) {
+		for (unsigned int i = 0; i < timerLog.size(); i++) {
 			average += timerLog[i];
 		}
 		average = average / timerLog.size();

@@ -11,7 +11,6 @@ App::App(InfoMPI &info) {
 			setup->isMPI = true;
 			setup->PROJECT_TYPE = 2;
 			setup->PROCESSORS = info.noProcs;
-
 		} else {
 			setup->isMPI = false;
 		}
@@ -32,6 +31,8 @@ App::App(InfoMPI &info) {
 				MPI_Send(&setup->THREADS, 1, MPI_INT, p, 6, MPI_COMM_WORLD);
 				MPI_Send(&setup->PROCESSORS, 1, MPI_INT, p, 7, MPI_COMM_WORLD);
 				MPI_Send(&setup->PROJECT_TYPE, 1, MPI_INT, p, 8, MPI_COMM_WORLD);
+				MPI_Send(&setup->DRAW_GRAPHICS, 1, MPI_INT, p, 9, MPI_COMM_WORLD);
+				MPI_Send(&setup->ITERATIONS, 1, MPI_INT, p, 10, MPI_COMM_WORLD);
 			}
 		}
 		if (info.rank != 0) {
@@ -43,8 +44,9 @@ App::App(InfoMPI &info) {
 			MPI_Recv(&setup->THREADS, 1, MPI_INT, 0, 6, MPI_COMM_WORLD, &status);
 			MPI_Recv(&setup->PROCESSORS, 1, MPI_INT, 0, 7, MPI_COMM_WORLD, &status);
 			MPI_Recv(&setup->PROJECT_TYPE, 1, MPI_INT, 0, 8, MPI_COMM_WORLD, &status);
+			MPI_Recv(&setup->DRAW_GRAPHICS, 1, MPI_INT, 0, 9, MPI_COMM_WORLD, &status);
+			MPI_Recv(&setup->ITERATIONS, 1, MPI_INT, 0, 10, MPI_COMM_WORLD, &status);
 		}
-		
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	switch (setup->PROJECT_TYPE) {

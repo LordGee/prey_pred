@@ -154,14 +154,14 @@ void Setup::EditOptions(int value) {
 void Setup::SelectProjectType() {
 	std::cout << std::endl;
 	std::cout << "Select type of project to run:" << std::endl;
-	for (int i = 0; i < m_ProjectType.size(); i++) {
+	for (unsigned int i = 0; i < m_ProjectType.size(); i++) {
 		std::cout << "\t" << i + 1 << ". \t" << m_ProjectType[i] << std::endl;
 	}
 	std::cout << ">>> ";
 	int tempValue = -1;
 	std::cin >> tempValue;
 	IncorrectValueEntry(tempValue, std::cin.fail());
-	while (tempValue < 1 || tempValue > m_ProjectType.size()) {
+	while (tempValue < 1 || tempValue > (signed int)m_ProjectType.size()) {
 		tempValue = QuestionAnswer("Choose one of the above options only...");
 	}
 	PROJECT_TYPE = tempValue - 1;

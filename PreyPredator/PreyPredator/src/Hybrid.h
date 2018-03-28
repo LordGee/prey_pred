@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Simulator.h"
-#include "mpi.h"
 
 class Hybrid : public Simulator {
 public:
