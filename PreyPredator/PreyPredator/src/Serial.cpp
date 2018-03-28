@@ -92,7 +92,24 @@ void Serial::RunSimNoDraw(const int COUNT) {
 }
 
 void Serial::RunNoDisplay(const int COUNT) {
-	
+	noDraw = true;
+	int counter = 0;
+	clock_t t1, t2;
+	float timer;
+	while (counter < COUNT) {
+		t1 = clock();
+		UpdateSimulation();
+		counter++;
+		t2 = clock();
+		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
+		timerLog.push_back(timer);
+	}
+	float average = 0.0f;
+	for (int i = 0; i < timerLog.size(); i++) {
+		average += timerLog[i];
+	}
+	average = average / timerLog.size();
+	std::cout << "Test Completed\nAverage time for each iteration - " << average << std::endl;
 }
 
 void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {

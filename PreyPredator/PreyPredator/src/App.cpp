@@ -1,5 +1,7 @@
 #include "App.h"
 #include <cstdlib>
+#include "FileWriter.h"
+
 
 App::App(InfoMPI &info) {
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -60,7 +62,16 @@ App::App(InfoMPI &info) {
 		sim->info.noProcs = info.noProcs;
 		sim->info.rank = info.rank;
 		break;
+	case 3:
+		if (setup->HEIGHT % info.noProcs != 0) {
+			setup->HEIGHT = abs(setup->HEIGHT / info.noProcs) * info.noProcs;
+		}
+		sim = new Hybrid(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
+		sim->info.noProcs = info.noProcs;
+		sim->info.rank = info.rank;
+		break;
 	}
+
 	
 	
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -72,6 +83,9 @@ App::App(InfoMPI &info) {
 		sim->RunSimNoDraw(setup->ITERATIONS);
 	} else {
 		sim->RunNoDisplay(setup->ITERATIONS);
+		if (info.rank == 0) {
+			FileWiter(sim->timerLog);
+		}
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 }

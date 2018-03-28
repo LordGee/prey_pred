@@ -2,6 +2,7 @@
 #include "Serial.h"
 #include "OpenMP.h"
 #include "msMPI.h"
+#include "Hybrid.h"
 #include "Setup.h"
 
 class App {

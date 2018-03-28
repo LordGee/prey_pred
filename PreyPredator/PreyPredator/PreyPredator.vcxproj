@@ -245,6 +245,8 @@
     <ClInclude Include="res\sdl\inc\SDL_vulkan.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Cell.h" />
+    <ClInclude Include="src\FileWriter.h" />
+    <ClInclude Include="src\Hybrid.h" />
     <ClInclude Include="src\msMPI.h" />
     <ClInclude Include="src\OpenMP.h" />
     <ClInclude Include="src\Serial.h" />
@@ -284,6 +286,7 @@
   <ItemGroup>
     <ClCompile Include="src\FirstAttemptMPI.cpp" />
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\Hybrid.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\msMPI.cpp" />
     <ClCompile Include="src\OpenMP.cpp" />

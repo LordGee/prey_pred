@@ -137,30 +137,14 @@ void MsMPI::RunNoDisplay(const int COUNT) {
 	float timer;
 	while (counter < COUNT) {
 		t1 = clock();
-		/*deadPrey = 0, deadPred = 0;
-		livePrey = 0, livePred = 0, empty = 0;*/
+
 		UpdateSimulation();
-		/*if (info.rank == 0) {
-			for (int x = 0; x < width; x++) {
-				for (int y = 0; y < height; y++) {
-					if (newGrid[x][y].value > 0) {
-						livePrey++;
-					}
-					else if (newGrid[x][y].value < 0) {
-						livePred++;
-					}
-					else {
-						empty++;
-					}
-				}
-			}
-		}*/
+
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
 		if (info.rank == 0) {
 			timerLog.push_back(timer);
-			//UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 		}
 	}
 	if (info.rank == 0) {
@@ -169,10 +153,9 @@ void MsMPI::RunNoDisplay(const int COUNT) {
 			average += timerLog[i];
 		}
 		average = average / timerLog.size();
-		std::cout << "Average time for each iteration - " << average << std::endl;
+		std::cout << "Test Completed\nAverage time for each iteration - " << average << std::endl;
 		fflush(stdout);
 	}
-	
 }
 
 void MsMPI::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
