@@ -7,22 +7,22 @@ App::App(InfoMPI &info) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (info.rank == 0) {
 		setup = new Setup;
-		if (info.noProcs > 1) {
+		if (info.numProcs > 1) {
 			setup->isMPI = true;
 			setup->PROJECT_TYPE = 2;
-			setup->PROCESSORS = info.noProcs;
+			setup->PROCESSORS = info.numProcs;
 		} else {
 			setup->isMPI = false;
 		}
 		setup->DisplaySelection();
 	}
-	if (info.noProcs > 1) {
+	if (info.numProcs > 1) {
 		MPI_Status status;
 		if (info.rank != 0) {
 			setup = new Setup;
 		}
 		if (info.rank == 0) {
-			for (int p = 1; p < info.noProcs; p++) {
+			for (int p = 1; p < info.numProcs; p++) {
 				MPI_Send(&setup->WIDTH, 1, MPI_INT, p, 1, MPI_COMM_WORLD);
 				MPI_Send(&setup->HEIGHT, 1, MPI_INT, p, 2, MPI_COMM_WORLD);
 				MPI_Send(&setup->PREY_PERCENT, 1, MPI_INT, p, 3, MPI_COMM_WORLD);
@@ -57,19 +57,19 @@ App::App(InfoMPI &info) {
 		sim = new OpenMP(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
 		break;
 	case 2:
-		if (setup->HEIGHT % info.noProcs != 0) {
-			setup->HEIGHT = abs(setup->HEIGHT / info.noProcs) * info.noProcs;
+		if (setup->HEIGHT % info.numProcs != 0) {
+			setup->HEIGHT = abs(setup->HEIGHT / info.numProcs) * info.numProcs;
 		}
 		sim = new MsMPI(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
-		sim->info.noProcs = info.noProcs;
+		sim->info.numProcs = info.numProcs;
 		sim->info.rank = info.rank;
 		break;
 	case 3:
-		if (setup->HEIGHT % info.noProcs != 0) {
-			setup->HEIGHT = abs(setup->HEIGHT / info.noProcs) * info.noProcs;
+		if (setup->HEIGHT % info.numProcs != 0) {
+			setup->HEIGHT = abs(setup->HEIGHT / info.numProcs) * info.numProcs;
 		}
 		sim = new Hybrid(setup->WIDTH, setup->HEIGHT, setup->PREY_PERCENT, setup->PRED_PERCENT, setup->RANDOM_SEED, setup->THREADS, setup->PROCESSORS);
-		sim->info.noProcs = info.noProcs;
+		sim->info.numProcs = info.numProcs;
 		sim->info.rank = info.rank;
 		break;
 	}

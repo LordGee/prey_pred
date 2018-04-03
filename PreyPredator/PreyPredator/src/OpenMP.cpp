@@ -12,14 +12,14 @@ void OpenMP::PopulateGrid() {
 			for (int y = 0; y < height; y++) {
 				float random = (float)(rand()) / (float)(RAND_MAX);
 				if (random < prey) {
-					newGrid[x][y].value = 1;
-					newGrid[x][y].age = 1;
+					mainGrid[x][y].type = 1;
+					mainGrid[x][y].age = 1;
 				} else if (random < prey + pred) {
-					newGrid[x][y].value = -1;
-					newGrid[x][y].age = 1;
+					mainGrid[x][y].type = -1;
+					mainGrid[x][y].age = 1;
 				} else {
-					newGrid[x][y].value = 0;
-					newGrid[x][y].age = 0;
+					mainGrid[x][y].type = 0;
+					mainGrid[x][y].age = 0;
 				}
 			}
 		}
@@ -46,11 +46,11 @@ void OpenMP::DrawSimToScreen(const int COUNT) {
 		SDL_RenderClear(renderer);
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				if (newGrid[x][y].value > 0) {
+				if (mainGrid[x][y].type > 0) {
 					SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 					SDL_RenderDrawPoint(renderer, x, y);
 					livePrey++;
-				} else if (newGrid[x][y].value < 0) {
+				} else if (mainGrid[x][y].type < 0) {
 					SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 					SDL_RenderDrawPoint(renderer, x, y);
 					livePred++;
@@ -83,13 +83,11 @@ void OpenMP::RunSimNoDraw(const int COUNT) {
 #pragma omp for reduction (+: livePrey, livePred, empty)
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					if (newGrid[x][y].value > 0) {
+					if (mainGrid[x][y].type > 0) {
 						livePrey++;
-					}
-					else if (newGrid[x][y].value < 0) {
+					} else if (mainGrid[x][y].type < 0) {
 						livePred++;
-					}
-					else {
+					} else {
 						empty++;
 					}
 				}
@@ -109,9 +107,7 @@ void OpenMP::RunNoDisplay(const int COUNT) {
 	float timer;
 	while (counter < COUNT) {
 		t1 = clock();
-
 		UpdateSimulation();
-
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
@@ -148,13 +144,13 @@ void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 
 void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
-	// Loop COPY to init and zero off values
+	// Loop COPY to zero off values
 #pragma omp parallel num_threads(numThreads) 
 	{
 #pragma omp for
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				copyGrid[x][y].value = 0;
+				copyGrid[x][y].type = 0;
 				copyGrid[x][y].age = 0;
 			}
 		}
@@ -166,6 +162,7 @@ void OpenMP::UpdateSimulation() {
 #pragma omp for
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
+				// Evaluate neighbours
 				int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
 				for (int i = -1; i < 2; i++) {
 					for (int j = -1; j < 2; j++) {
@@ -175,15 +172,15 @@ void OpenMP::UpdateSimulation() {
 							if (xTest < 0) { xTest = xTest + width; }
 							if (yTest >= height) { yTest = yTest - height; }
 							if (xTest >= width) { xTest = xTest - width; }
-							if (newGrid[xTest][yTest].value > 0) {
+							if (mainGrid[xTest][yTest].type > 0) {
 								preyCount++;
-								if (newGrid[xTest][yTest].age >= PREY_BREEDING) {
+								if (mainGrid[xTest][yTest].age >= PREY_BREEDING) {
 									preyAge++;
 								}
 							}
-							else if (newGrid[xTest][yTest].value < 0) {
+							else if (mainGrid[xTest][yTest].type < 0) {
 								predCount++;
-								if (newGrid[xTest][yTest].age >= PRED_BREEDING) {
+								if (mainGrid[xTest][yTest].age >= PRED_BREEDING) {
 									predAge++;
 								}
 							}
@@ -191,56 +188,56 @@ void OpenMP::UpdateSimulation() {
 					}
 				}
 				// set current cell to new value depending on rules
-				if (newGrid[x][y].value > 0) {
+				if (mainGrid[x][y].type > 0) {
 					//manage prey
-					if (predCount >= 5 || preyCount == 8 || newGrid[x][y].age > PREY_LIVE) {
-						copyGrid[x][y].value = 0;
+					if (predCount >= 5 || preyCount == 8 || mainGrid[x][y].age > PREY_LIVE) {
+						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 						deadPrey++;
 					} else {
-						copyGrid[x][y].value = newGrid[x][y].value;
-						copyGrid[x][y].age = newGrid[x][y].age + 1;
+						copyGrid[x][y].type = mainGrid[x][y].type;
+						copyGrid[x][y].age = mainGrid[x][y].age + 1;
 					}
 				}
-				else if (newGrid[x][y].value < 0) {
+				else if (mainGrid[x][y].type < 0) {
 					// manage predator
 					float random = (float)(rand()) / (float)(RAND_MAX);
 					if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
 						if (random <= PRED_SUDDEN_DEATH) {
 							int z = 0;
 						}
-						copyGrid[x][y].value = 0;
+						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 						deadPred++;
 					} else {
-						copyGrid[x][y].value = newGrid[x][y].value;
-						copyGrid[x][y].age = newGrid[x][y].age + 1;
+						copyGrid[x][y].type = mainGrid[x][y].type;
+						copyGrid[x][y].age = mainGrid[x][y].age + 1;
 					}
 				} else {
 					// manage empty space
 					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
-						copyGrid[x][y].value = 1;
+						copyGrid[x][y].type = 1;
 						copyGrid[x][y].age = 1;
 					}
 					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
-						copyGrid[x][y].value = -1;
+						copyGrid[x][y].type = -1;
 						copyGrid[x][y].age = 1;
 					} else {
-						copyGrid[x][y].value = 0;
+						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 					}
 				}
 			}
 		}
 	}
-#pragma omp barrier
 	// copy the COPY back to the main array
+#pragma omp barrier
 #pragma omp parallel num_threads(numThreads)
 	{
 #pragma omp for
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrid[x][y] = copyGrid[x][y];
+				mainGrid[x][y] = copyGrid[x][y];
 			}
 		}
 	}

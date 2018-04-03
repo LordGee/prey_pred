@@ -10,17 +10,17 @@ static int livePrey, livePred, empty;
 static int deadPrey, deadPred;
 
 struct InfoMPI {
-	int rank, noProcs;
+	int rank, numProcs;
 
 	InfoMPI() {
 		rank = -1;
-		noProcs = -1;
+		numProcs = -1;
 	}
 };
 
 class Simulator {
 public:
-	std::vector<std::vector<Cell>> newGrid;
+	std::vector<std::vector<Cell>> mainGrid;
 	std::vector<std::vector<Cell>> copyGrid;
 	
 	int width, height, seed, numThreads, numProc;

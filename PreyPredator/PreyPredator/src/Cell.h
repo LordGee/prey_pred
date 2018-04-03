@@ -2,13 +2,12 @@
 
 class Cell {
 public: 
-	int value;
+	int type;
 	int age;
 
 public:
 	Cell() {
-		value = 0;
+		type = 0;
 		age = 0;
 	};
-
 };
