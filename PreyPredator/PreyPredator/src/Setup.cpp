@@ -4,18 +4,19 @@
 #include <stdlib.h>
 #include <cstdlib>
 
+// Constructor
 Setup::Setup() {
 	// Set default values
-	PROJECT_TYPE = 1;
-	WIDTH = 1000;
-	HEIGHT = 1000;
-	PREY_PERCENT = 50;
-	PRED_PERCENT = 25;
-	RANDOM_SEED = 1234;
-	DRAW_GRAPHICS = 3;
-	ITERATIONS = 100;
-	PROCESSORS = 1;
-	THREADS = 1;
+	projectType = 1;
+	width = 1000;
+	height = 1000;
+	preyPercentage = 50;
+	PredPercentage = 25;
+	randomSeed = 1234;
+	display = 1;
+	iterations = 1000;
+	processes = 1;
+	threads = 1;
 
 	// Define diferent tyypes of projects
 	m_ProjectType.push_back("Serial");
@@ -24,33 +25,33 @@ Setup::Setup() {
 	m_ProjectType.push_back("Hybrid");
 
 	/* File location depending on execution method (Comment out unused) */
-	exefilename = "PreyPredator.exe"; // production mode
+	m_Exefilename = "PreyPredator.exe"; // production mode
 	// exefilename = "../bin/release/PreyPredator.exe"; // release mode run through VS
 	// exefilename = "../bin/debug/PreyPredator.exe"; // debug mode run through VS
-
 	//exefilename = "../bin/debug/run.bat"; // debug mode run through VS
 }
 
+// ASCI display options
 void Setup::DisplaySelection() {
-	// system("cls");
+	system("cls");
 	std::cout << "WELCOME TO THE PREY VS PREDATOR SIMULATOR" << std::endl;
 	std::cout << "\tby Gordon Johnson (k1451760)" << std::endl;
 	std::cout << std::endl;
-	std::cout << "You have " << PROCESSORS << " processes available in this instance." << std::endl;
+	std::cout << "You have " << processes << " processes available in this instance." << std::endl;
 	std::cout << std::endl;
 	std::cout << "The following options have been selected:" << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
 	std::cout << "| OPTION | DISCRIPTION                  | SELECTION " << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "| 1.\t | Simulation Type:\t\t| " << m_ProjectType[PROJECT_TYPE] << std::endl;
-	std::cout << "| 2.\t | Grid Width:\t\t\t| " << WIDTH << std::endl;
-	std::cout << "| 3.\t | Grid Height:\t\t\t| " << HEIGHT << std::endl;
-	std::cout << "| 4.\t | Prey Percentage:\t\t| " << PREY_PERCENT << std::endl;
-	std::cout << "| 5.\t | Predator Percentage:\t\t| " << PRED_PERCENT << std::endl;
-	std::cout << "| 6.\t | Random Seed:\t\t\t| " << RANDOM_SEED << std::endl;
-	std::cout << "| 7.\t | Graphics Mode:\t\t| " << ((DRAW_GRAPHICS == 1) ? "Graphics" : (DRAW_GRAPHICS == 2) ? "ASCI" : "No Display") << std::endl;
-	std::cout << "| 8.\t | Number of Iterations:\t| " << ITERATIONS << std::endl;
-	std::cout << "| 9.\t | Number of Threads:\t\t| " << THREADS << std::endl;
+	std::cout << "| 1.\t | Simulation Type:\t\t| " << m_ProjectType[projectType] << std::endl;
+	std::cout << "| 2.\t | Grid Width:\t\t\t| " << width << std::endl;
+	std::cout << "| 3.\t | Grid Height:\t\t\t| " << height << std::endl;
+	std::cout << "| 4.\t | Prey Percentage:\t\t| " << preyPercentage << std::endl;
+	std::cout << "| 5.\t | Predator Percentage:\t\t| " << PredPercentage << std::endl;
+	std::cout << "| 6.\t | Random Seed:\t\t\t| " << randomSeed << std::endl;
+	std::cout << "| 7.\t | Graphics Mode:\t\t| " << ((display == 1) ? "Graphics" : (display == 2) ? "ASCI" : "No Display") << std::endl;
+	std::cout << "| 8.\t | Number of Iterations:\t| " << iterations << std::endl;
+	std::cout << "| 9.\t | Number of Threads:\t\t| " << threads << std::endl;
 	std::cout << "----------------------------------------------------" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Select an option to edit (1, 2, 3, 4, 5, 6, 7, 8, 9) " << std::endl;
@@ -65,6 +66,7 @@ void Setup::DisplaySelection() {
 	EditOptions(tempValue);
 }
 
+// Manage selected options
 void Setup::EditOptions(int value) {
 	int tempValue = -1;
 	switch (value) {
@@ -79,7 +81,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 10) {
 			tempValue = QuestionAnswer("Choose a number larger then 10 ...");
 		}
-		WIDTH = tempValue;	
+		width = tempValue;	
 		DisplaySelection();
 		break;
 	case 3:
@@ -87,7 +89,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 10) {
 			tempValue = QuestionAnswer("Choose a number larger then 10 ...");
 		}
-		HEIGHT = tempValue;
+		height = tempValue;
 		DisplaySelection();
 		break;
 	case 4:
@@ -95,10 +97,10 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 1 || tempValue > 100) {
 			tempValue = QuestionAnswer("Choose a pecentage value larger then 0 and less then 100 ...");
 		}
-		if (PRED_PERCENT + tempValue > 100) {
-			PRED_PERCENT = 100 - tempValue;
+		if (PredPercentage + tempValue > 100) {
+			PredPercentage = 100 - tempValue;
 		}
-		PREY_PERCENT = tempValue;
+		preyPercentage = tempValue;
 		DisplaySelection();
 		break;
 	case 5:
@@ -106,10 +108,10 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 1 || tempValue > 100) {
 			tempValue = QuestionAnswer("Choose a pecentage value larger then 0 and less then 100 ...");
 		}
-		if (PREY_PERCENT + tempValue > 100) {
-			PREY_PERCENT = 100 - tempValue;
+		if (preyPercentage + tempValue > 100) {
+			preyPercentage = 100 - tempValue;
 		}
-		PRED_PERCENT = tempValue;
+		PredPercentage = tempValue;
 		DisplaySelection();
 		break;
 	case 6:
@@ -117,7 +119,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 0 || tempValue > 99999) {
 			tempValue = QuestionAnswer("Choose a number between 1 and 99999 ...");
 		}
-		RANDOM_SEED = tempValue;
+		randomSeed = tempValue;
 		DisplaySelection();
 		break;
 	case 7:
@@ -125,7 +127,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 1 || tempValue > 3) {
 			tempValue = QuestionAnswer("Choose option 1, 2 or 3 ...");
 		}
-		DRAW_GRAPHICS = tempValue;
+		display = tempValue;
 		DisplaySelection();
 		break;
 	case 8:
@@ -133,7 +135,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 1) {
 			tempValue = QuestionAnswer("You need to have at least 1 iteration ...");
 		}
-		ITERATIONS = tempValue;
+		iterations = tempValue;
 		DisplaySelection();
 		break;
 	case 9:
@@ -142,7 +144,7 @@ void Setup::EditOptions(int value) {
 		while (tempValue < 2 || tempValue > 32) {
 			tempValue = QuestionAnswer("Choose a sensible thread value between 2 and 32...");
 		}
-		THREADS = tempValue;
+		threads = tempValue;
 		DisplaySelection();
 		break;
 	default:
@@ -151,6 +153,7 @@ void Setup::EditOptions(int value) {
 	}
 }
 
+// Manage project type change, if MPI related relaunch application
 void Setup::SelectProjectType() {
 	std::cout << std::endl;
 	std::cout << "Select type of project to run:" << std::endl;
@@ -164,8 +167,8 @@ void Setup::SelectProjectType() {
 	while (tempValue < 1 || tempValue > (signed int)m_ProjectType.size()) {
 		tempValue = QuestionAnswer("Choose one of the above options only...");
 	}
-	PROJECT_TYPE = tempValue - 1;
-	if (PROCESSORS <= 1) {
+	projectType = tempValue - 1;
+	if (processes <= 1) {
 		if (tempValue > 2) {
 			std::cout << "WARNING: This will restart application and reset all previously configured settings back to default." << std::endl;
 			int procValue = QuestionAnswer("How many processes would you like to use for this simulation?");
@@ -173,13 +176,14 @@ void Setup::SelectProjectType() {
 			while (procValue < 2 || procValue > 32) {
 				procValue = QuestionAnswer("Choose a sensible processor value between 2 and 32...");
 			}
-			PROCESSORS = procValue;
+			processes = procValue;
 
 			system(GenerateExeLauncher().c_str());
 		}
 	}
 }
 
+// Manage user incorrect option input
 void Setup::IncorrectValueEntry(int& value, bool fail) {
 	while (fail) {
 		std::cout << "Incorrect value entry, please try again!" << std::endl;
@@ -191,6 +195,7 @@ void Setup::IncorrectValueEntry(int& value, bool fail) {
 	}
 }
 
+// Refactored to display question and manage incorrect inputs
 int Setup::QuestionAnswer(const char* question) {
 	int value;
 	std::cout << question << std::endl;
@@ -200,10 +205,11 @@ int Setup::QuestionAnswer(const char* question) {
 	return value;
 }
 
+// Handles execution string for launching into MPI project type
 std::string Setup::GenerateExeLauncher() {
 	std::string output;
 	std::string initValue = "mpiexec -n ";
-	output = initValue + std::to_string(PROCESSORS) + " " + exefilename;
+	output = initValue + std::to_string(processes) + " " + m_Exefilename;
 	printf("%s", output);
 	return output;
 }

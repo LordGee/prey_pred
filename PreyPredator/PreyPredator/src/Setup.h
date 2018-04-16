@@ -3,12 +3,12 @@
 
 class Setup {
 public:
-	int PROJECT_TYPE, WIDTH, HEIGHT, PREY_PERCENT, PRED_PERCENT, RANDOM_SEED, DRAW_GRAPHICS, ITERATIONS, THREADS, PROCESSORS;
+	int projectType, width, height, preyPercentage, PredPercentage, randomSeed, display, iterations, threads, processes;
 	bool isMPI = false;
 
 private:
 	std::vector<const char*> m_ProjectType;
-	const char* exefilename;
+	const char* m_Exefilename;
 
 public:
 	Setup();

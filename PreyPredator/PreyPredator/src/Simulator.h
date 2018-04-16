@@ -6,14 +6,16 @@
 #include <iostream>
 #include "mpi.h"
 
+// Statistic Variables
 static int livePrey, livePred, empty;
 static int deadPrey, deadPred;
 
+// Structure to manage MPI information
 struct InfoMPI {
-	int rank, numProcs;
+	int procRank, numProcs;
 
 	InfoMPI() {
-		rank = -1;
+		procRank = -1;
 		numProcs = -1;
 	}
 };
@@ -32,14 +34,16 @@ public:
 	const int PREY_BREEDING = 2;
 	const int PRED_BREEDING = 3;
 
-	const int NO_BREEDING = 4;
-	const int NO_AGE = 3;
-	const int NO_WITNESSES = 4;
+	const int NUM_BREEDING = 4;
+	const int NUM_OF_AGE = 3;
+	const int NUM_OF_WITNESSES = 4;
 
 	const int PREY_LIVE = 10;
 	const int PRED_LIVE = 20;
 
 	const float PRED_SUDDEN_DEATH = 0.031f;
+
+	const int MASTER = 0;
 
 	MPI_Status status;
 	MPI_Request request;

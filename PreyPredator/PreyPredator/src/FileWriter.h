@@ -3,6 +3,7 @@
 #include <ostream>
 #include <fstream>
 
+// Simple file write to record values from an array to a CSV file
 static void FileWiter(std::vector<float> log) {
 	const char* saveFile = "data/test.csv";
 	std::ofstream wf;

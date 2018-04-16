@@ -5,6 +5,7 @@
 
 void OpenMP::PopulateGrid() {
 	srand(seed);
+	// OpenMP target, does not improve performance of sim, only setup
 #pragma omp parallel num_threads(numThreads)
 	{
 #pragma omp for
@@ -32,10 +33,8 @@ void OpenMP::DrawSimToScreen(const int COUNT) {
 	float timer;
 	SDL_Event event;
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-
 	while (counter < COUNT) {
 		t1 = clock();
 		livePrey = 0, livePred = 0, empty = 0;
@@ -78,6 +77,7 @@ void OpenMP::RunSimNoDraw(const int COUNT) {
 		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
 		UpdateSimulation();
+		// OpenMP Target, use of global variables require the use of reduction
 #pragma omp parallel num_threads(numThreads) shared (livePrey, livePred, empty)
 		{
 #pragma omp for reduction (+: livePrey, livePred, empty)
@@ -145,6 +145,7 @@ void OpenMP::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 void OpenMP::UpdateSimulation() {
 	// generate COPY cell array
 	// Loop COPY to zero off values
+	// OpenMP Target
 #pragma omp parallel num_threads(numThreads) 
 	{
 #pragma omp for
@@ -156,6 +157,7 @@ void OpenMP::UpdateSimulation() {
 		}
 	}
 	// loop through all cells and determin neighbour count
+	// OpenMP Target, for the evaluation loop
 #pragma omp parallel num_threads(numThreads)
 	{
 		srand(time(NULL));
@@ -177,8 +179,7 @@ void OpenMP::UpdateSimulation() {
 								if (mainGrid[xTest][yTest].age >= PREY_BREEDING) {
 									preyAge++;
 								}
-							}
-							else if (mainGrid[xTest][yTest].type < 0) {
+							} else if (mainGrid[xTest][yTest].type < 0) {
 								predCount++;
 								if (mainGrid[xTest][yTest].age >= PRED_BREEDING) {
 									predAge++;
@@ -215,11 +216,10 @@ void OpenMP::UpdateSimulation() {
 					}
 				} else {
 					// manage empty space
-					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
+					if (preyCount >= NUM_BREEDING && preyAge >= NUM_OF_AGE && predCount < NUM_OF_WITNESSES) {
 						copyGrid[x][y].type = 1;
 						copyGrid[x][y].age = 1;
-					}
-					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+					} else if (predCount >= NUM_BREEDING && predAge >= NUM_OF_AGE && preyCount < NUM_OF_WITNESSES) {
 						copyGrid[x][y].type = -1;
 						copyGrid[x][y].age = 1;
 					} else {
@@ -231,6 +231,7 @@ void OpenMP::UpdateSimulation() {
 		}
 	}
 	// copy the COPY back to the main array
+	// OpenMP Target, Barrier used to ensure all evaluations have been completed
 #pragma omp barrier
 #pragma omp parallel num_threads(numThreads)
 	{

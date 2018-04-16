@@ -284,13 +284,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\FirstAttemptMPI.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Hybrid.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\msMPI.cpp" />
     <ClCompile Include="src\OpenMP.cpp" />
-    <ClCompile Include="src\SecondAttemptMPI_OK_Slow.cpp" />
     <ClCompile Include="src\Serial.cpp" />
     <ClCompile Include="src\Setup.cpp" />
     <ClCompile Include="src\Simulator.cpp" />

@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 
+// Initial Population of the main grid based on percentages supplied
 void Serial::PopulateGrid() {
 	srand(seed);
 	for (int x = 0; x < width; x++) {
@@ -21,16 +22,15 @@ void Serial::PopulateGrid() {
 	}
 }
 
+// Display Graphics Entry Point plus Main Loop
 void Serial::DrawSimToScreen(const int COUNT) {
 	int counter = 0;
 	clock_t t1, t2;
 	float timer;
 	SDL_Event event;
 	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	
+	SDL_Window* window = SDL_CreateWindow("PREY vs PREDATOR Simulation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);	
 	while (counter < COUNT) {
 		t1 = clock();
 		livePrey = 0, livePred = 0, empty = 0;
@@ -64,6 +64,7 @@ void Serial::DrawSimToScreen(const int COUNT) {
 	SDL_Quit();
 }
 
+// Display ASCI Statistics Entry Point plus Main Loop
 void Serial::RunSimNoDraw(const int COUNT) {
 	int counter = 0;
 	clock_t t1, t2;
@@ -92,6 +93,7 @@ void Serial::RunSimNoDraw(const int COUNT) {
 	}
 }
 
+// Display Nothing Entry Point plus Main Loop
 void Serial::RunNoDisplay(const int COUNT) {
 	noDraw = true;
 	int counter = 0;
@@ -113,6 +115,7 @@ void Serial::RunNoDisplay(const int COUNT) {
 	std::cout << "Test Completed\nAverage time for each iteration - " << average << std::endl;
 }
 
+// Display statisics to console window
 void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
 	system("cls");
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
@@ -134,6 +137,7 @@ void Serial::UpdateStatistics(float time, int iteration, int lPrey, int lPred, i
 	printf(" -------------------------------------------\n");
 }
 
+// Update Simulator
 void Serial::UpdateSimulation() {
 	// generate COPY cell array
 		// Loop COPY to init and zero off values
@@ -148,6 +152,7 @@ void Serial::UpdateSimulation() {
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
+			// Check neighbouring states and store information for evaluation
 			for (int i = -1; i < 2; i++) {
 				for (int j = -1; j < 2; j++) {
 					if (!(i == 0 && j == 0)) {
@@ -194,12 +199,10 @@ void Serial::UpdateSimulation() {
 				}
 			} else {
 				// manage empty space
-				if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && 
-						predCount < NO_WITNESSES) {
+				if (preyCount >= NUM_BREEDING && preyAge >= NUM_OF_AGE && predCount < NUM_OF_WITNESSES) {
 					copyGrid[x][y].type = 1;
 					copyGrid[x][y].age = 1;
-				} else if (predCount >= NO_BREEDING && predAge >= NO_AGE && 
-						preyCount < NO_WITNESSES) {
+				} else if (predCount >= NUM_BREEDING && predAge >= NUM_OF_AGE && preyCount < NUM_OF_WITNESSES) {
 					copyGrid[x][y].type = -1;
 					copyGrid[x][y].age = 1;
 				} else {

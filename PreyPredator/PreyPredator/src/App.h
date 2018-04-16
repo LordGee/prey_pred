@@ -6,16 +6,11 @@
 #include "Setup.h"
 
 class App {
-public:
 
 private:
-	Setup* setup;
-	Simulator* sim;
-
+	Setup* m_Setup; // Instance of setup information
+	Simulator* m_Sim; // Instance of the Simulator
 	int m_IterationCount;
-
-protected:
-	// int WIDTH, HEIGHT;
 
 public:
 	App(InfoMPI &info);

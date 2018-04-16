@@ -10,37 +10,37 @@ void Hybrid::PopulateGrid() {
 	int processorCounter = 1;
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			if (info.rank == 0) {
+			// Only the master manages the initial declaration of each cell state
+			if (info.procRank == MASTER) {
 				float random = (float)(rand()) / (float)(RAND_MAX);
 				if (random < prey) {
 					mainGrid[x][y].type = 1;
 					mainGrid[x][y].age = 1;
-				}
-				else if (random < prey + pred) {
+				} else if (random < prey + pred) {
 					mainGrid[x][y].type = -1;
 					mainGrid[x][y].age = 1;
-				}
-				else {
+				} else {
 					mainGrid[x][y].type = 0;
 					mainGrid[x][y].age = 0;
 				}
 			}
+			// determine if the y value has exceeded the current processor split
 			if (y >= contributionY * (processorCounter + 1)) {
 				if (processorCounter != info.numProcs - 1) {
 					processorCounter++;
 				}
 			}
+			// If within the current processor copy the master cell to the appropriate processor
 			if (y >= contributionY * processorCounter && y < contributionY * (processorCounter + 1)) {
-				if (info.rank == 0) {
+				if (info.procRank == MASTER) {
 					MPI_Send(&mainGrid[x][y], 2, MPI_INT, processorCounter, y, MPI_COMM_WORLD);
-					//MPI_Send(&newGrid[x][y].age, 1, MPI_INT, processorCounter, y * (x + 1), MPI_COMM_WORLD);
 				}
-				if (info.rank == processorCounter) {
+				if (info.procRank == processorCounter) {
 					MPI_Recv(&mainGrid[x][y], 2, MPI_INT, 0, y, MPI_COMM_WORLD, &status);
-					//MPI_Recv(&newGrid[x][y].age, 1, MPI_INT, 0, y * (x + 1), MPI_COMM_WORLD, &status);
 				}
 			}
 		}
+		// at the end of each y iteration reset processor to 1
 		processorCounter = 1;
 	}
 }
@@ -53,10 +53,10 @@ void Hybrid::DrawSimToScreen(const int COUNT) {
 	SDL_Event event;
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
-	if (info.rank == 0) {
+	// Only master process should draw to screen
+	if (info.procRank == MASTER) {
 		SDL_Init(SDL_INIT_VIDEO);
-		window = SDL_CreateWindow("PREY vs PREDATOR Simulation",
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+		window = SDL_CreateWindow("PREY vs PREDATOR Simulation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 		renderer = SDL_CreateRenderer(window, -1, 0);
 	}
 	while (counter < COUNT) {
@@ -64,7 +64,8 @@ void Hybrid::DrawSimToScreen(const int COUNT) {
 		livePrey = 0, livePred = 0, empty = 0;
 		deadPrey = 0, deadPred = 0;
 		UpdateSimulation();
-		if (info.rank == 0) {
+		// Only master process should draw to screen
+		if (info.procRank == MASTER) {
 			SDL_PollEvent(&event);
 			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 125);
 			SDL_RenderClear(renderer);
@@ -74,13 +75,11 @@ void Hybrid::DrawSimToScreen(const int COUNT) {
 						SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 						SDL_RenderDrawPoint(renderer, x, y);
 						livePrey++;
-					}
-					else if (mainGrid[x][y].type < 0) {
+					} else if (mainGrid[x][y].type < 0) {
 						SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 						SDL_RenderDrawPoint(renderer, x, y);
 						livePred++;
-					}
-					else {
+					} else {
 						empty++;
 					}
 				}
@@ -90,7 +89,8 @@ void Hybrid::DrawSimToScreen(const int COUNT) {
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		if (info.rank == 0) {
+		// Only master process should draw to screen
+		if (info.procRank == MASTER) {
 			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 		}
 	}
@@ -108,16 +108,15 @@ void Hybrid::RunSimNoDraw(const int COUNT) {
 		deadPrey = 0, deadPred = 0;
 		livePrey = 0, livePred = 0, empty = 0;
 		UpdateSimulation();
-		if (info.rank == 0) {
+		// Only master process should draw to screen
+		if (info.procRank == MASTER) {
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
 					if (mainGrid[x][y].type > 0) {
 						livePrey++;
-					}
-					else if (mainGrid[x][y].type < 0) {
+					} else if (mainGrid[x][y].type < 0) {
 						livePred++;
-					}
-					else {
+					} else {
 						empty++;
 					}
 				}
@@ -126,7 +125,8 @@ void Hybrid::RunSimNoDraw(const int COUNT) {
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		if (info.rank == 0) {
+		// Only master process should draw to screen
+		if (info.procRank == MASTER) {
 			UpdateStatistics(timer, counter, livePrey, livePred, empty, deadPrey, deadPred);
 		}
 	}
@@ -139,17 +139,17 @@ void Hybrid::RunNoDisplay(const int COUNT) {
 	float timer;
 	while (counter < COUNT) {
 		t1 = clock();
-
 		UpdateSimulation();
-
 		counter++;
 		t2 = clock();
 		timer = (float)(t2 - t1) / CLOCKS_PER_SEC;
-		if (info.rank == 0) {
+		// Only master process should log timer information
+		if (info.procRank == MASTER) {
 			timerLog.push_back(timer);
 		}
 	}
-	if (info.rank == 0) {
+	// Only master process should draw to screen
+	if (info.procRank == MASTER) {
 		float average = 0.0f;
 		for (unsigned int i = 0; i < timerLog.size(); i++) {
 			average += timerLog[i];
@@ -161,7 +161,7 @@ void Hybrid::RunNoDisplay(const int COUNT) {
 }
 
 void Hybrid::UpdateStatistics(float time, int iteration, int lPrey, int lPred, int empty, int dPrey, int dPred) {
-	// system("cls");
+	// system("cls"); // Removed MPI does not like this feature
 	printf(" WELCOME TO THE PREY VS PREDATOR SIMULATOR\n");
 	printf("\t by Gordon Johnson (k1451760)\n\n");
 	printf(" -------------------------------------------\n");
@@ -186,6 +186,7 @@ void Hybrid::UpdateSimulation() {
 
 	// generate COPY cell array
 	// Loop COPY to init and zero off values
+	// OpenMP Target
 #pragma omp parallel num_threads(numThreads)
 	{
 #pragma omp for
@@ -199,33 +200,34 @@ void Hybrid::UpdateSimulation() {
 	const int contributionY = abs(height / info.numProcs);
 	srand(time(NULL));
 
-	// prepare top and bottom bounderies
+	// prepare top and bottom bounderies for evaluating neighbouring states
 	for (int x = 0; x < width; x++) {
-		if (info.rank == 0) {
+		if (info.procRank == MASTER) {
 			MPI_Send(&mainGrid[x][0], 2, MPI_INT, info.numProcs - 1, x, MPI_COMM_WORLD);
 			MPI_Recv(&mainGrid[x][height - 1], 2, MPI_INT, info.numProcs - 1, x + width, MPI_COMM_WORLD, &status);
-		}
-		else if (info.rank == info.numProcs - 1) {
+		} else if (info.procRank == info.numProcs - 1) {
 			MPI_Send(&mainGrid[x][height - 1], 2, MPI_INT, 0, x + width, MPI_COMM_WORLD);
 			MPI_Recv(&mainGrid[x][0], 2, MPI_INT, 0, x, MPI_COMM_WORLD, &status);
 		}
-		if (info.rank != info.numProcs - 1) {
-			MPI_Send(&mainGrid[x][(contributionY * (info.rank + 1)) - 1], 2, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&mainGrid[x][(contributionY * (info.rank + 1))], 2, MPI_INT, info.rank + 1, x, MPI_COMM_WORLD, &status);
+		if (info.procRank != info.numProcs - 1) {
+			MPI_Send(&mainGrid[x][(contributionY * (info.procRank + 1)) - 1], 2, MPI_INT, info.procRank + 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&mainGrid[x][(contributionY * (info.procRank + 1))], 2, MPI_INT, info.procRank + 1, x, MPI_COMM_WORLD, &status);
 		}
-		if (info.rank != 0) {
-			MPI_Send(&mainGrid[x][contributionY * info.rank], 2, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD);
-			MPI_Recv(&mainGrid[x][(contributionY * info.rank) - 1], 2, MPI_INT, info.rank - 1, x, MPI_COMM_WORLD, &status);
+		if (info.procRank != MASTER) {
+			MPI_Send(&mainGrid[x][contributionY * info.procRank], 2, MPI_INT, info.procRank - 1, x, MPI_COMM_WORLD);
+			MPI_Recv(&mainGrid[x][(contributionY * info.procRank) - 1], 2, MPI_INT, info.procRank - 1, x, MPI_COMM_WORLD, &status);
 		}
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	// loop through all cells and determin neighbour count
+	// OpenMP Target for main loop
 #pragma omp parallel num_threads(numThreads)
 	{
 #pragma omp for
 		for (int x = 0; x < width; x++) {
-			for (int y = contributionY * info.rank; y < contributionY * (info.rank + 1); y++) {
+			// Only unique processer dependent y range is processed
+			for (int y = contributionY * info.procRank; y < contributionY * (info.procRank + 1); y++) {
 				int preyCount = 0, preyAge = 0, predCount = 0, predAge = 0;
 				for (int i = -1; i < 2; i++) {
 					for (int j = -1; j < 2; j++) {
@@ -240,8 +242,7 @@ void Hybrid::UpdateSimulation() {
 								if (mainGrid[xTest][yTest].age >= PREY_BREEDING) {
 									preyAge++;
 								}
-							}
-							else if (mainGrid[xTest][yTest].type < 0) {
+							} else if (mainGrid[xTest][yTest].type < 0) {
 								predCount++;
 								if (mainGrid[xTest][yTest].age >= PRED_BREEDING) {
 									predAge++;
@@ -256,8 +257,7 @@ void Hybrid::UpdateSimulation() {
 						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 						deadPrey++;
-					}
-					else {
+					} else {
 						copyGrid[x][y].type = mainGrid[x][y].type;
 						copyGrid[x][y].age = mainGrid[x][y].age + 1;
 					}
@@ -266,29 +266,22 @@ void Hybrid::UpdateSimulation() {
 					// manage predator
 					float random = (float)(rand()) / (float)(RAND_MAX);
 					if ((predCount >= 6 && preyCount == 0) || random <= PRED_SUDDEN_DEATH || copyGrid[x][y].age > PRED_LIVE) {
-						if (random <= PRED_SUDDEN_DEATH) {
-							int z = 0;
-						}
 						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 						deadPred++;
-					}
-					else {
+					} else {
 						copyGrid[x][y].type = mainGrid[x][y].type;
 						copyGrid[x][y].age = mainGrid[x][y].age + 1;
 					}
-				}
-				else {
+				} else {
 					// manage empty space
-					if (preyCount >= NO_BREEDING && preyAge >= NO_AGE && predCount < NO_WITNESSES) {
+					if (preyCount >= NUM_BREEDING && preyAge >= NUM_OF_AGE && predCount < NUM_OF_WITNESSES) {
 						copyGrid[x][y].type = 1;
 						copyGrid[x][y].age = 1;
-					}
-					else if (predCount >= NO_BREEDING && predAge >= NO_AGE && preyCount < NO_WITNESSES) {
+					} else if (predCount >= NUM_BREEDING && predAge >= NUM_OF_AGE && preyCount < NUM_OF_WITNESSES) {
 						copyGrid[x][y].type = -1;
 						copyGrid[x][y].age = 1;
-					}
-					else {
+					} else {
 						copyGrid[x][y].type = 0;
 						copyGrid[x][y].age = 0;
 					}
@@ -297,25 +290,28 @@ void Hybrid::UpdateSimulation() {
 		}
 	}
 	// copy the COPY back to the main array
+	// OpenMP Target
 #pragma omp parallel num_threads(numThreads)
 	{
 #pragma omp for
 		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+			// Only unique processer dependent y range is processed
+			for (int y = contributionY * info.procRank; y < contributionY * (info.procRank + 1); y++) {
 				mainGrid[x][y] = copyGrid[x][y];
 			}
 		}
 	}
 
+	// If setup dissplay is drawing stats to screen the MASTER process needs all grid information sent to it
 	if (!noDraw) {
 		int processorCounter = info.numProcs - 1;
 		while (processorCounter != 0) {
 			for (int x = 0; x < width; x++) {
 				for (int y = contributionY * processorCounter; y < height; y++) {
-					if (info.rank == processorCounter) {
+					if (info.procRank == processorCounter) {
 						MPI_Rsend(&mainGrid[x][y], 2, MPI_INT, processorCounter - 1, y * (x + processorCounter), MPI_COMM_WORLD);
 					}
-					if (info.rank == processorCounter - 1) {
+					if (info.procRank == processorCounter - 1) {
 						MPI_Recv(&mainGrid[x][y], 2, MPI_INT, processorCounter, y * (x + processorCounter), MPI_COMM_WORLD, &status);
 					}
 				}
